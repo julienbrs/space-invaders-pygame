@@ -33,7 +33,8 @@ LIST_DIFFICULTY = ["Easy", "Medium", "Hard"]
 DIFFICULTY_NUMBER = 0
 text_menu_welcome       = FONT_MENU_WELCOME.render("Space Invaders Retro", 1, LIGHT_GREY)
 text_menu_start_game    = FONT_MENU_START.render("Start the game", 1, GREY)
-text_menu_difficulty    = FONT_MENU_START.render(f"Difficulty: {LIST_DIFFICULTY[DIFFICULTY_NUMBER]}", 1, GREY)
+text_menu_difficulty    = FONT_MENU_START.render(
+                            f"Difficulty: {LIST_DIFFICULTY[DIFFICULTY_NUMBER]}", 1, GREY)
 text_menu_leaderboard   = FONT_MENU_START.render("Leaderboard", 1, GREY)
 
 
@@ -44,7 +45,7 @@ IMG_GAME_BACKGROUND = pygame.image.load(
 IMG_SPACESHIP_DEFAULT = pygame.image.load(
     os.path.join('Assets', 'spaceship_red.png'))
 
-    
+
 RED_LASER = pygame.image.load(os.path.join("Assets", "pixel_laser_red.png"))
 
 IMG_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(
@@ -78,16 +79,18 @@ class LinkedText():
 
             start_pos   = (self.x - new_text.get_width()/2, self.y + new_text.get_height() /2 )
             end_pos     = (self.x + new_text.get_width()/2, self.y + new_text.get_height() /2 )
-            pygame.draw.line(MAIN_WIN, GREY, start_pos, end_pos, width = int(text.get_height() * 0.08))
+            pygame.draw.line(MAIN_WIN, GREY,
+                             start_pos, end_pos, width = int(text.get_height() * 0.08))
 
         else:
             surface.blit(text, (self.x - text.get_width()/2,
                      self.y - text.get_height()/2))
 
 def collide(item1, item2):
+    "check if there is a collision"
     offset_x = item1.x - item2.x
     offset_y = item1.x - item2.y
-    return item1.mask.overlap(item2.mask, (offset_x, offset_y)) != None
+    return item1.mask.overlap(item2.mask, (offset_x, offset_y)) is not None
 
 class Laser():
     "Class of lasers, x and y: where it starts"
@@ -95,23 +98,28 @@ class Laser():
         self.x          = x
         self.y          = y
         self.direction  = direction
-        self.img        = RED_LASER
+        self.img        = img
         self.mask       = pygame.mask.from_surface(self.img)
-    
+
     def draw(self):
+        "draw item"
         MAIN_WIN.blit(self.img, (self.x, self.y))
 
     def move(self, velocity):
+        "move the item, velocity can also change the direction + or -"
         self.y += velocity
-    
+
     def off_screen(self, height):
+        "check if item isn't off the screen"
         return self.y >= 0 and self.y <= height
-    
+
     def collision(self, obj):
+        "check a collision"
         return collide(self, obj)
 
 
 class Player():
+    "class of the player"
 
     def __init__(self, x, y, width, height, img):
         self.x          = x
@@ -121,20 +129,22 @@ class Player():
         self.img        = img
         self.laser_img  = None
         self.lasers     = []
-    
+
     def draw(self):
+        "draw item"
         MAIN_WIN.blit(self.img, (self. x, self.y))
         for laser in self.lasers:
             laser.draw()
-    
+
     def shoot(self):
-        laser = Laser(self.x - self.width/2, self.y - self.height, None, self.laser_img)
+        "shoot"
+        laser = Laser(self.x - self.width/2, self.y - self.height, None, RED_LASER)
         self.lasers.append(laser)
 
     def collision(self, other):
+        "collision"
         return collide(self, other)
 
-    
     def move(self, keys):
         "move the player"
         if keys[pygame.K_LEFT] and player.x > 0:    #Left
@@ -159,7 +169,8 @@ start_game.next_text, start_game.prev_text = difficulty, leaderboard
 MENU_SELECTED = start_game
 
 
-player = Player((WIDTH- SPACESHIP_WIDTH)/2, HEIGHT * 0.75, SPACESHIP_WIDTH, SPACESHIP_HEIGHT, IMG_SPACESHIP)
+player = Player((WIDTH- SPACESHIP_WIDTH)/2, HEIGHT * 0.75,
+                 SPACESHIP_WIDTH, SPACESHIP_HEIGHT, IMG_SPACESHIP)
 
 def draw_menu(text_blink, text_scroll):
     "draw the start menu, text_scroll can be up, down or none"
@@ -224,11 +235,13 @@ def main():
 
                     if event.key == pygame.K_RIGHT and MENU_SELECTED == difficulty:
                         DIFFICULTY_NUMBER = (DIFFICULTY_NUMBER + 1 ) %3
-                        text_menu_difficulty = FONT_MENU_START.render(f"Difficulty: {LIST_DIFFICULTY[DIFFICULTY_NUMBER]}", 1, GREY)
+                        text_menu_difficulty = FONT_MENU_START.render(
+                                    f"Difficulty: {LIST_DIFFICULTY[DIFFICULTY_NUMBER]}", 1, GREY)
 
                     if event.key == pygame.K_LEFT and MENU_SELECTED == difficulty:
                         DIFFICULTY_NUMBER = (DIFFICULTY_NUMBER - 1 ) %3
-                        text_menu_difficulty = FONT_MENU_START.render(f"Difficulty: {LIST_DIFFICULTY[DIFFICULTY_NUMBER]}", 1, GREY)
+                        text_menu_difficulty = FONT_MENU_START.render(
+                                    f"Difficulty: {LIST_DIFFICULTY[DIFFICULTY_NUMBER]}", 1, GREY)
 
 
 
