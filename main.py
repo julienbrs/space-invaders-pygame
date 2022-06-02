@@ -11,13 +11,15 @@ pygame.font.init()
 
 FPS = 80
 
+VELOCITY_PLAYER = 7
+
 pygame.display.set_caption("Space Invaders")
 
 WHITE   = (255, 255, 255)
 GREY    = (125, 125, 125)
+LIGHT_GREY = (175, 175, 175)
 
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
-
 
 FONT_MENU_WELCOME = pygame.font.SysFont("comicsans", 120)
 FONT_MENU_START = pygame.font.SysFont("comicsans", 55)
@@ -27,7 +29,7 @@ MAIN_WIN = pygame.display.set_mode(MAIN_WIN_SIZE)
 
 LIST_DIFFICULTY = ["Easy", "Medium", "Hard"]
 DIFFICULTY_NUMBER = 0
-text_menu_welcome       = FONT_MENU_WELCOME.render("Space Invaders Retro", 1, WHITE)
+text_menu_welcome       = FONT_MENU_WELCOME.render("Space Invaders Retro", 1, LIGHT_GREY)
 text_menu_start_game    = FONT_MENU_START.render("Start the game", 1, GREY)
 text_menu_difficulty    = FONT_MENU_START.render(f"Difficulty: {LIST_DIFFICULTY[DIFFICULTY_NUMBER]}", 1, GREY)
 text_menu_leaderboard   = FONT_MENU_START.render("Leaderboard", 1, GREY)
@@ -44,21 +46,6 @@ IMG_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(
     IMG_SPACESHIP_DEFAULT, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 180)
 
 
-
-#class Button():
-#    "class of a button, for the moment only in menu ?"
-#
-#    def __init__(self, x, y, selected):
-#        self.x = x
-#        self.y = y
-#        self.selected = selected
-#
-#    def draw(self, text, window, font, color, size):
-#        button_text = font.render(text, 1, color)
-#        width_box, height_box = size
-#        rect_box = pygame.Rect(self.x, self.y, width_box, height_box)
-#        pygame.draw.rect(WIN, GREY, BORDER)
-#        window.blit(button_text, self.x, self.y + button_text.get_height/2)
 
 class LinkedText():
     "Class to link text for a menu"
@@ -89,10 +76,13 @@ class LinkedText():
 
 class Player():
 
-    def __init__(self, x, y):
-        pass
-
-
+    def __init__(self, x, y, img):
+        self.x = x
+        self.y = y
+        self.img = img
+    
+    def draw(self):
+        MAIN_WIN.blit(self.img, (self.x, self.y))
 
 start_game  = LinkedText(WIDTH /2, HEIGHT /2, True, None, None)
 difficulty  = LinkedText(WIDTH /2, HEIGHT /1.5, False, None, start_game)
@@ -101,6 +91,8 @@ difficulty.next_text = leaderboard
 start_game.next_text, start_game.prev_text = difficulty, leaderboard
 MENU_SELECTED = start_game
 
+
+player = Player((WIDTH- SPACESHIP_WIDTH)/2, HEIGHT * 0.75, IMG_SPACESHIP)
 
 def draw_menu(text_blink, text_scroll):
     "draw the start menu, text_scroll can be up, down or none"
@@ -131,9 +123,7 @@ def draw_game():
     "Draw the game"
     MAIN_WIN.blit(pygame.transform.scale(IMG_GAME_BACKGROUND, MAIN_WIN_SIZE), (0,0))
 
-    MAIN_WIN.blit(IMG_SPACESHIP, (500, 500))
-
-    
+    player.draw()
     pygame.display.update()
 
 def main():
@@ -169,6 +159,11 @@ def main():
                         DIFFICULTY_NUMBER = (DIFFICULTY_NUMBER + 1 ) %3
                         text_menu_difficulty = FONT_MENU_START.render(f"Difficulty: {LIST_DIFFICULTY[DIFFICULTY_NUMBER]}", 1, GREY)
 
+                    if event.key == pygame.K_LEFT and MENU_SELECTED == difficulty:
+                        DIFFICULTY_NUMBER = (DIFFICULTY_NUMBER - 1 ) %3
+                        text_menu_difficulty = FONT_MENU_START.render(f"Difficulty: {LIST_DIFFICULTY[DIFFICULTY_NUMBER]}", 1, GREY)
+
+
 
                     if event.key == pygame.K_RETURN and MENU_SELECTED == start_game:
                         run_menu = False
@@ -181,6 +176,18 @@ def main():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run_game, app_run = False, False
+
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT] and player.x > 0:    #Left
+                player.x -= VELOCITY_PLAYER
+            if keys[pygame.K_RIGHT] and player.x < WIDTH:    #Right
+                player.x += VELOCITY_PLAYER
+            if keys[pygame.K_UP] and player.y > 0:    #Top
+                player.y -= VELOCITY_PLAYER
+            if keys[pygame.K_DOWN] and player.y < HEIGHT:    #Left
+                player.y += VELOCITY_PLAYER
+
+
 
             draw_game()
 
