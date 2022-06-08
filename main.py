@@ -3,7 +3,9 @@
 Space invaders
 """""
 import os
+import random
 import pygame
+import class_names as fclass
 pygame.font.init()
 
 #TOdo: transparent color for the menu
@@ -79,185 +81,16 @@ class LinkedText():
 
             start_pos   = (self.x - new_text.get_width()/2, self.y + new_text.get_height() /2 )
             end_pos     = (self.x + new_text.get_width()/2, self.y + new_text.get_height() /2 )
-            pygame.draw.line(MAIN_WIN, GREY,
+            pygame.draw.line(surface, GREY,
                              start_pos, end_pos, width = int(text.get_height() * 0.08))
 
         else:
             surface.blit(text, (self.x - text.get_width()/2,
                      self.y - text.get_height()/2))
 
-def collide(item1, item2):
-    "check if there is a collision"
-    offset_x = item2.x - item1.x
-    offset_y = item2.y - item1.y
-    return item1.mask.overlap(item2.mask, (offset_x, offset_y)) is not None
-
-class Laser():
-    "Class of lasers, x and y: where it starts"
-    def __init__(self, x, y, direction, img):
-        self.x          = x
-        self.y          = y
-        self.direction  = direction
-        self.img        = img
-        self.mask       = pygame.mask.from_surface(self.img)
-
-    def draw(self):
-        "draw item"
-        MAIN_WIN.blit(self.img, (self.x, self.y))
-
-    def move(self, velocity):
-        "move the item, velocity can also change the direction + or -"
-        self.y += velocity
-
-    def off_screen(self, height):
-        "check if item isn't off the screen"
-        return self.y >= 0 and self.y <= height
-
-    def collision(self, obj):
-        "check a collision"
-        return collide(self, obj)
-
-class Shooter():
-    "def class of shooter"
-
-    def __init__(self, x, y,img):
-        self.x = x
-        self.y = y
-        self.img = img
-
-    def draw(self):
-        "draw item"
-        MAIN_WIN.blit(self.img, (self. x, self.y))
-        for laser in self.lasers:
-            laser.draw()
-
-    def shoot(self):
-        "shoot"
-        laser = Laser(self.x - self.width/2, self.y - self.height, None, RED_LASER)
-        self.lasers.append(laser)
-
-    def collision(self, other):
-        "collision"
-        return collide(self, other)
-
-    def move(self, keys):
-        "move the player"
-        if keys[pygame.K_LEFT] and self.x > 0:    #Left
-            self.x -= VELOCITY_PLAYER
-        if keys[pygame.K_RIGHT] and self.x + self.width < WIDTH:    #Right
-            self.x += VELOCITY_PLAYER
-        if keys[pygame.K_UP] and self.y > 0:    #Top
-            self.y -= VELOCITY_PLAYER
-        if keys[pygame.K_DOWN] and self.y + self.height < HEIGHT:    #Left
-            self.y += VELOCITY_PLAYER
-
-
-    def move_lasers(self, velocity, others):
-        """move lasers of the shooter, check if collision with others, can
-        change the direction with sign of velocity"""
-        for laser in self.lasers:
-            laser.move(velocity)
-            on_screen = True #trouver meilleur moyen ?
-            for other in others:
-                if laser.collision(other):
-                    others.remove(other)
-                    self.lasers.remove(laser)
-                    on_screen = False
-            if not laser.off_screen(HEIGHT) and on_screen:
-                self.lasers.remove(laser)
-
-class Player(Shooter):
-    "class of the player"
-        
-    def __init__(self, x, y, width, height, img):
-        super().__init__(x, y, img)
-        self.width      = width #todo
-        self.height     = height
-        self.img        = img
-        self.laser_img  = None
-        self.lasers     = []
-        self.mask       = pygame.mask.from_surface(self.img)
-
-
-    def shoot(self):
-        "shoot"
-        laser = Laser(self.x - self.width/2, self.y - self.height, None, RED_LASER)
-        self.lasers.append(laser)
-
-    def collision(self, other):
-        "collision"
-        return collide(self, other)
-
-    def move(self, keys):
-        "move the player"
-        if keys[pygame.K_LEFT] and self.x > 0:    #Left
-            self.x -= VELOCITY_PLAYER
-        if keys[pygame.K_RIGHT] and self.x + self.width < WIDTH:    #Right
-            self.x += VELOCITY_PLAYER
-        if keys[pygame.K_UP] and self.y > 0:    #Top
-            self.y -= VELOCITY_PLAYER
-        if keys[pygame.K_DOWN] and self.y + self.height < HEIGHT:    #Left
-            self.y += VELOCITY_PLAYER
-
-
-    def move_lasers(self, velocity, others):
-        """move lasers of the shooter, check if collision with others, can
-        change the direction with sign of velocity"""
-        for laser in self.lasers:
-            laser.move(velocity)
-            on_screen = True #trouver meilleur moyen ?
-            for other in others:
-                if laser.collision(other):
-                    others.remove(other)
-                    self.lasers.remove(laser)
-                    on_screen = False
-            if not laser.off_screen(HEIGHT) and on_screen:
-                self.lasers.remove(laser)
-
-
-class Ennemy():
-    "class of the ennemy"
-
-    def __init__(self, x, y, width, height, img):
-        self.x          = x
-        self.y          = y
-        self.width      = width
-        self.height     = height
-        self.img        = img
-        self.laser_img  = None
-        self.lasers     = []
-        self.mask       = pygame.mask.from_surface(self.img)
-
-    def draw(self):
-        "draw item"
-        MAIN_WIN.blit(self.img, (self. x, self.y))
-        for laser in self.lasers:
-            laser.draw()
-
-    def move(self, velocity):
-        "move the item, velocity can also change the direction + or -"
-        self.y += velocity
-
-    def move_lasers(self):
-        "move lasers and check if collision with player"
-        for laser in self.lasers:
-            if not laser.off_screen(): #fixer le nom aussi ici
-                self.lasers.remove(laser)
-            if laser.collision(player):
-                self.lasers.remove(laser)
-
-    def not_off_screen(self, height):
-        "check if item isn't off the screen"
-        return self.y >= 0 and self.y <= height
-
-    def shoot(self):
-        "shoot"
-        laser = Laser(self.x - self.width/2, self.y - self.height, None, RED_LASER)
-        self.lasers.append(laser)
-
-    def collision(self, other):
-        "collision"
-        return collide(self, other)
+    def useless(self):
+        "nothing"
+        pass
 
 
 
@@ -270,22 +103,22 @@ start_game.next_text, start_game.prev_text = difficulty, leaderboard
 MENU_SELECTED = start_game
 
 
-player = Player((WIDTH- SPACESHIP_WIDTH)/2, HEIGHT * 0.75,
-                 SPACESHIP_WIDTH, SPACESHIP_HEIGHT, IMG_SPACESHIP)
+player = fclass.Player((WIDTH- SPACESHIP_WIDTH)/2, HEIGHT * 0.75,
+                 SPACESHIP_WIDTH, SPACESHIP_HEIGHT, IMG_SPACESHIP, RED_LASER)
 
-def draw_menu(text_blink, text_scroll):
+def draw_menu(text_blink, text_scroll, surface):
     "draw the start menu, text_scroll can be up, down or none"
 
-    MAIN_WIN.blit(pygame.transform.scale(IMG_MENU_BACKGROUND, MAIN_WIN_SIZE), (0,0))
+    surface.blit(pygame.transform.scale(IMG_MENU_BACKGROUND, MAIN_WIN_SIZE), (0,0))
 
     text_blink = (text_blink + 1) % 100
     if text_blink <= 50 :
-        MAIN_WIN.blit(text_menu_welcome,((WIDTH - text_menu_welcome.get_width())/2,
+        surface.blit(text_menu_welcome,((WIDTH - text_menu_welcome.get_width())/2,
                     (HEIGHT/3 - text_menu_welcome.get_height())/2))
 
-    start_game.draw(MAIN_WIN, text_menu_start_game)
-    difficulty.draw(MAIN_WIN, text_menu_difficulty)
-    leaderboard.draw(MAIN_WIN, text_menu_leaderboard)
+    start_game.draw(surface, text_menu_start_game)
+    difficulty.draw(surface, text_menu_difficulty)
+    leaderboard.draw(surface, text_menu_leaderboard)
     global MENU_SELECTED
     if text_scroll == "DOWN":
         MENU_SELECTED = MENU_SELECTED.next_text
@@ -298,12 +131,12 @@ def draw_menu(text_blink, text_scroll):
     pygame.display.update()
     return text_blink, text_scroll
 
-def draw_game(ennemies):
+def draw_game(ennemies, surface):
     "Draw the game"
-    MAIN_WIN.blit(pygame.transform.scale(IMG_GAME_BACKGROUND, MAIN_WIN_SIZE), (0,0))
+    surface.blit(pygame.transform.scale(IMG_GAME_BACKGROUND, MAIN_WIN_SIZE), (0,0))
     for ennemy in ennemies:
-        ennemy.draw()
-    player.draw()
+        ennemy.draw(MAIN_WIN)
+    player.draw(MAIN_WIN)
     pygame.display.update()
 
 def wave_ennemies(level):
@@ -313,7 +146,7 @@ def wave_ennemies(level):
     abscisse = 50
     for _ in range(nb_ennemies):
 
-        ennemy = Ennemy(abscisse , 0, SPACESHIP_WIDTH, SPACESHIP_HEIGHT, IMG_ENNEMY_SPACESHIP_YELLOW)
+        ennemy = fclass.Ennemy(abscisse , 0, SPACESHIP_WIDTH, SPACESHIP_HEIGHT, IMG_ENNEMY_SPACESHIP_YELLOW, RED_LASER)
         print(f"x = {ennemy.x}, y= {ennemy.y}")
         list_ennemies.append(ennemy)
         abscisse += 250
@@ -329,7 +162,7 @@ def move_ennemies(ennemies):
     "move all ennemies and their lasers"
     for ennemy in ennemies:
         ennemy.move(VELOCITY_BOT)
-        ennemy.move_lasers()
+        ennemy.move_lasers(player, VELOCITY_BOT, HEIGHT)
         if ennemy.collision(player):
             ennemies.remove(ennemy)
         elif not ennemy.not_off_screen(HEIGHT): #todo enlever ces doubles negations
@@ -358,11 +191,11 @@ def main():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
                         text_scroll = "UP"
-                        text_blink, text_scroll = draw_menu(text_blink - 1, text_scroll)
+                        text_blink, text_scroll = draw_menu(text_blink - 1, text_scroll, MAIN_WIN)
 
                     if event.key == pygame.K_DOWN:
                         text_scroll = "DOWN"
-                        text_blink, text_scroll = draw_menu(text_blink - 1, text_scroll)
+                        text_blink, text_scroll = draw_menu(text_blink - 1, text_scroll, MAIN_WIN)
 
                     if event.key == pygame.K_RIGHT and MENU_SELECTED == difficulty:
                         DIFFICULTY_NUMBER = (DIFFICULTY_NUMBER + 1 ) %3
@@ -379,7 +212,7 @@ def main():
                     if event.key == pygame.K_RETURN and MENU_SELECTED == start_game:
                         run_menu = False
                         run_game = True
-            text_blink, text_scroll = draw_menu(text_blink, text_scroll)
+            text_blink, text_scroll = draw_menu(text_blink, text_scroll, MAIN_WIN)
 
         while run_game:
             clock.tick(FPS)
@@ -396,12 +229,15 @@ def main():
             if LVL_INIT:
                 ennemies, LVL_INIT = init_lvl()
             keys = pygame.key.get_pressed()
-            player.move(keys)
+            player.move(keys, VELOCITY_PLAYER, MAIN_WIN_SIZE)
             move_ennemies(ennemies)
-            player.move_lasers(-VELOCITY_LASER_PLAYER, ennemies)
+            for ennemy in ennemies:
+                if random.randrange(0, 2*60) == 1:
+                    ennemy.shoot()
+            player.move_lasers(-VELOCITY_LASER_PLAYER, ennemies, HEIGHT)
 
 
-            draw_game(ennemies)
+            draw_game(ennemies, MAIN_WIN)
 
     pygame.quit()
 
