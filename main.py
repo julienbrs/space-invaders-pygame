@@ -5,7 +5,6 @@ Space invaders
 import os
 import random
 import pygame
-from wcwidth import list_versions
 import class_names as fclass
 pygame.font.init()
 import flevel
@@ -20,7 +19,8 @@ MAX_LASER_PLAYER            = 15
 VELOCITY_LASER_PLAYER       = 9
 LASER_SIZE = LASER_WIDTH, LASER_HEIGHT = 18,6
 
-CURRENT_LEVEL = 1
+CURRENT_LEVEL   = 1
+LIFE_LEFT       = 3
 
 pygame.display.set_caption("Space Invaders")
 
@@ -32,6 +32,7 @@ SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 
 FONT_MENU_WELCOME = pygame.font.SysFont("comicsans", 120)
 FONT_MENU_START = pygame.font.SysFont("comicsans", 55)
+FONT_HUD        = pygame.font.SysFont("comicsans", 55)
 
 MAIN_WIN_SIZE = WIDTH, HEIGHT = 1200, 800
 MAIN_WIN = pygame.display.set_mode(MAIN_WIN_SIZE)
@@ -43,6 +44,12 @@ text_menu_start_game    = FONT_MENU_START.render("Start the game", 1, GREY)
 text_menu_difficulty    = FONT_MENU_START.render(
                             f"Difficulty: {LIST_DIFFICULTY[DIFFICULTY_NUMBER]}", 1, GREY)
 text_menu_leaderboard   = FONT_MENU_START.render("Leaderboard", 1, GREY)
+
+
+#HUD
+
+text_hud_life       = FONT_HUD.render(f"Life = {LIFE_LEFT}", 1, LIGHT_GREY)
+text_hud_lvl        = FONT_HUD.render(f"Level = {CURRENT_LEVEL}", 1, LIGHT_GREY)
 
 
 IMG_MENU_BACKGROUND = pygame.image.load(
@@ -136,6 +143,11 @@ def draw_menu(text_blink, text_scroll, surface):
 def draw_game(ennemies, surface):
     "Draw the game"
     surface.blit(pygame.transform.scale(IMG_GAME_BACKGROUND, MAIN_WIN_SIZE), (0,0))
+
+    #Draw HUD
+    surface.blit(text_hud_life, (WIDTH - text_hud_life.get_width()*1.5, 50))
+    surface.blit(text_hud_lvl, (WIDTH - text_hud_lvl.get_width()*1.5, 150))
+
     for ennemy in ennemies:
         ennemy.draw(MAIN_WIN)
     player.draw(MAIN_WIN)
@@ -148,18 +160,17 @@ def wave_ennemies(level, ):
     random.shuffle(list_type)
 
     number = len(list_type)
-    abscisse = random.randint(40, 65)       #trouver moyen de fix ça
+    abscisse = random.randrange(40, 65)       #trouver moyen de fix ça
     ordonnee = 0
     for i in range(number):
         if abscisse > WIDTH:
-            abscisse = random.randint(40, 65) 
-            ordonnee -= random.randint(15, 55)
-        print("abscisse, ordonnee = ", abscisse, ordonnee)
-        ennemy = fclass.Ennemy(abscisse , ordonnee, SPACESHIP_WIDTH, SPACESHIP_HEIGHT,
+            abscisse = random.randrange(50, 185) 
+            ordonnee -= random.randrange(150, 255)
+        ord_rel = random.randrange(0, 80)
+        ennemy = fclass.Ennemy(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH, SPACESHIP_HEIGHT,
          IMG_ENNEMY_SPACESHIP_YELLOW, RED_LASER)
         list_ennemies.append(ennemy)
-        abscisse += ennemy.get_width() + random.randint(105, 145)
-    print("le nb d'ennemy dans wave = ", len(list_ennemies))
+        abscisse += ennemy.get_width() + random.randrange(85, 245)
     return list_ennemies
 
 def init_lvl():
