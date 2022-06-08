@@ -5,9 +5,10 @@ Space invaders
 import os
 import random
 import pygame
+from wcwidth import list_versions
 import class_names as fclass
 pygame.font.init()
-
+import flevel
 #TOdo: transparent color for the menu
 
 # Variables globales
@@ -19,6 +20,7 @@ MAX_LASER_PLAYER            = 15
 VELOCITY_LASER_PLAYER       = 9
 LASER_SIZE = LASER_WIDTH, LASER_HEIGHT = 18,6
 
+CURRENT_LEVEL = 1
 
 pygame.display.set_caption("Space Invaders")
 
@@ -139,23 +141,30 @@ def draw_game(ennemies, surface):
     player.draw(MAIN_WIN)
     pygame.display.update()
 
-def wave_ennemies(level):
+def wave_ennemies(level, ):
     "Spawn a wave of ennemies depending of the level"
-    nb_ennemies = 4
     list_ennemies = []
-    abscisse = 50
-    for _ in range(nb_ennemies):
+    list_type = ["littlelevel"] * level[0]
+    random.shuffle(list_type)
 
-        ennemy = fclass.Ennemy(abscisse , 0, SPACESHIP_WIDTH, SPACESHIP_HEIGHT, IMG_ENNEMY_SPACESHIP_YELLOW, RED_LASER)
-        print(f"x = {ennemy.x}, y= {ennemy.y}")
+    number = len(list_type)
+    abscisse = random.randint(40, 65)       #trouver moyen de fix ça
+    ordonnee = 0
+    for i in range(number):
+        if abscisse > WIDTH:
+            abscisse = random.randint(40, 65) 
+            ordonnee -= random.randint(15, 55)
+        print("abscisse, ordonnee = ", abscisse, ordonnee)
+        ennemy = fclass.Ennemy(abscisse , ordonnee, SPACESHIP_WIDTH, SPACESHIP_HEIGHT,
+         IMG_ENNEMY_SPACESHIP_YELLOW, RED_LASER)
         list_ennemies.append(ennemy)
-        abscisse += 250
+        abscisse += ennemy.get_width() + random.randint(105, 145)
+    print("le nb d'ennemy dans wave = ", len(list_ennemies))
     return list_ennemies
 
 def init_lvl():
     "Init a lvl: spawn ennemies, return the wave and update HUD"
-    ennemies = wave_ennemies(1)
-    print("les ennemies dans init:",len(ennemies))
+    ennemies = wave_ennemies(flevel.list_level[CURRENT_LEVEL])
     return ennemies, False
 
 def move_ennemies(ennemies):
@@ -167,6 +176,8 @@ def move_ennemies(ennemies):
             ennemies.remove(ennemy)
         elif not ennemy.not_off_screen(HEIGHT): #todo enlever ces doubles negations
             ennemies.remove(ennemy)
+
+
 
 def main():
     "main loop"

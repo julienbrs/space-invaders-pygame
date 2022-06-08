@@ -94,6 +94,7 @@ class Shooter():
                     on_screen = False
             if not laser.off_screen(height) and on_screen:
                 self.lasers.remove(laser)
+    
 
 
 
@@ -183,3 +184,9 @@ class Ennemy(Shooter):
     def collision(self, other):
         "collision"
         return collide(self, other)
+
+    def get_width(self):
+        return self.img.get_width()
+
+    def get_height(self):
+        return self.img.get_height()
