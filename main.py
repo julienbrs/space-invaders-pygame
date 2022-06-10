@@ -14,13 +14,13 @@ import flevel
 FPS = 120
 
 VELOCITY_PLAYER             = 20
-VELOCITY_BOT                = 1
+VELOCITY_BOT                = 0.2
 MAX_LASER_PLAYER            = 15
 VELOCITY_LASER_PLAYER       = 9
 LASER_SIZE = LASER_WIDTH, LASER_HEIGHT = 18,6
 
 CURRENT_LEVEL   = 1
-LIFE_LEFT       = 3
+LIFE_LEFT       = 1
 
 pygame.display.set_caption("Space Invaders")
 
@@ -47,9 +47,6 @@ text_menu_leaderboard   = FONT_MENU_START.render("Leaderboard", 1, GREY)
 
 
 #HUD
-
-text_hud_life       = FONT_HUD.render(f"Life = {LIFE_LEFT}", 1, LIGHT_GREY)
-text_hud_lvl        = FONT_HUD.render(f"Level = {CURRENT_LEVEL}", 1, LIGHT_GREY)
 
 
 IMG_MENU_BACKGROUND = pygame.image.load(
@@ -104,6 +101,7 @@ class LinkedText():
 
 
 
+
 start_game  = LinkedText(WIDTH /2, HEIGHT /2, None, None)
 difficulty  = LinkedText(WIDTH /2, HEIGHT /1.5, None, start_game)
 leaderboard = LinkedText(WIDTH /2, HEIGHT / 1.3, start_game, difficulty)
@@ -145,15 +143,35 @@ def draw_game(ennemies, surface):
     surface.blit(pygame.transform.scale(IMG_GAME_BACKGROUND, MAIN_WIN_SIZE), (0,0))
 
     #Draw HUD
-    surface.blit(text_hud_life, (WIDTH - text_hud_life.get_width()*1.5, 50))
-    surface.blit(text_hud_lvl, (WIDTH - text_hud_lvl.get_width()*1.5, 150))
+    text_hud_life       = FONT_HUD.render(f"Life = {LIFE_LEFT}", 1, LIGHT_GREY)
+    text_hud_lvl        = FONT_HUD.render(f"Level = {CURRENT_LEVEL}", 1, LIGHT_GREY)
+
+    surface.blit(text_hud_life, (WIDTH * 0.85, 50))
+    surface.blit(text_hud_lvl, (WIDTH * 0.85, 110))
 
     for ennemy in ennemies:
         ennemy.draw(MAIN_WIN)
     player.draw(MAIN_WIN)
     pygame.display.update()
 
-def wave_ennemies(level, ):
+def draw_lose(surface, text_blink):
+    "Draw the losing screen"
+    surface.blit(pygame.transform.scale(IMG_GAME_BACKGROUND, MAIN_WIN_SIZE), (0,0))
+
+    text_lose       = FONT_MENU_WELCOME.render("U LOST", 1, LIGHT_GREY)
+    text_press      = FONT_MENU_WELCOME.render("Press Enter", 1, LIGHT_GREY)
+
+    text_blink = (text_blink + 1) % 100
+    if text_blink <= 50 :
+        surface.blit(text_press, (WIDTH/2 - text_press.get_width()/2,
+                HEIGHT/2 - text_press.get_height()/2 + 1.35*text_lose.get_height()))
+
+    surface.blit(text_lose, (WIDTH/2 - text_lose.get_width()/2,
+                HEIGHT/2 - text_lose.get_height()/2))
+    pygame.display.update()
+    return text_blink
+
+def wave_ennemies(level):
     "Spawn a wave of ennemies depending of the level"
     list_ennemies = []
     list_type = ["littlelevel"] * level[0]
@@ -162,13 +180,13 @@ def wave_ennemies(level, ):
     number = len(list_type)
     abscisse = random.randrange(40, 65)       #trouver moyen de fix ça
     ordonnee = 0
-    for i in range(number):
+    for _ in range(number):
         if abscisse > WIDTH:
             abscisse = random.randrange(50, 185) 
             ordonnee -= random.randrange(150, 255)
         ord_rel = random.randrange(0, 80)
         ennemy = fclass.Ennemy(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH, SPACESHIP_HEIGHT,
-         IMG_ENNEMY_SPACESHIP_YELLOW, RED_LASER)
+         IMG_ENNEMY_SPACESHIP_YELLOW, RED_LASER,10)
         list_ennemies.append(ennemy)
         abscisse += ennemy.get_width() + random.randrange(85, 245)
     return list_ennemies
@@ -184,6 +202,7 @@ def move_ennemies(ennemies):
         ennemy.move(VELOCITY_BOT)
         ennemy.move_lasers(player, VELOCITY_BOT, HEIGHT)
         if ennemy.collision(player):
+            player.lifebar -= 50
             ennemies.remove(ennemy)
         elif not ennemy.not_off_screen(HEIGHT): #todo enlever ces doubles negations
             ennemies.remove(ennemy)
@@ -196,13 +215,18 @@ def main():
     text_blink = 0
     text_scroll = None
     global DIFFICULTY_NUMBER
+    global LIFE_LEFT
+
+    global CURRENT_LEVEL
+    global player
+
     global text_menu_difficulty
     app_run  = True
     run_menu = True
     run_game = False
+    run_transi = False
 
     while app_run:
-
         while run_menu:
             clock.tick(FPS)
 
@@ -234,6 +258,7 @@ def main():
                     if event.key == pygame.K_RETURN and MENU_SELECTED == start_game:
                         run_menu = False
                         run_game = True
+
             text_blink, text_scroll = draw_menu(text_blink, text_scroll, MAIN_WIN)
 
         while run_game:
@@ -258,8 +283,33 @@ def main():
                     ennemy.shoot()
             player.move_lasers(-VELOCITY_LASER_PLAYER, ennemies, HEIGHT)
 
-
+            if player.lifebar <= 0:
+                player.lifebar = player.maxlife
+                LIFE_LEFT -= 1
             draw_game(ennemies, MAIN_WIN)
+            if LIFE_LEFT <= 0:
+                CURRENT_LEVEL   = 1
+                LIFE_LEFT       = 1
+                player = fclass.Player((WIDTH- SPACESHIP_WIDTH)/2, HEIGHT * 0.75,
+                 SPACESHIP_WIDTH, SPACESHIP_HEIGHT, IMG_SPACESHIP, RED_LASER)
+                for ennemy in ennemies:
+                    ennemy.destroy()
+                ennemies = None
+                LVL_INIT = True
+                run_game = False
+                run_transi = True
+
+        while run_transi:
+            clock.tick(FPS)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run_menu, app_run, run_transi = False, False, False
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        run_menu = True
+                        run_transi = False
+            text_blink = draw_lose(MAIN_WIN, text_blink)
 
     pygame.quit()
 
