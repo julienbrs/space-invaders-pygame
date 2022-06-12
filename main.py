@@ -11,24 +11,25 @@ import flevel
 #TOdo: transparent color for the menu
 
 # Variables globales
-FPS = 120
+FPS = 90
 
-VELOCITY_PLAYER             = 20
-VELOCITY_BOT                = 0.2
+VELOCITY_PLAYER             = 10
+VELOCITY_BOT                = 0.3
 MAX_LASER_PLAYER            = 15
 VELOCITY_LASER_PLAYER       = 9
 LASER_SIZE = LASER_WIDTH, LASER_HEIGHT = 18,6
 
 CURRENT_LEVEL   = 1
-LIFE_LEFT       = 1
-
+LIFE_LEFT       = 3
+MAX_LEVEL       = 25
+LIST_LEVEL      = flevel.create_list_level(MAX_LEVEL)
 pygame.display.set_caption("Space Invaders")
 
 WHITE   = (255, 255, 255)
 GREY    = (125, 125, 125)
 LIGHT_GREY = (175, 175, 175)
 
-SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
+SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 45, 78
 
 FONT_MENU_WELCOME = pygame.font.SysFont("comicsans", 120)
 FONT_MENU_START = pygame.font.SysFont("comicsans", 55)
@@ -46,15 +47,11 @@ text_menu_difficulty    = FONT_MENU_START.render(
 text_menu_leaderboard   = FONT_MENU_START.render("Leaderboard", 1, GREY)
 
 
-#HUD
-
 
 IMG_MENU_BACKGROUND = pygame.image.load(
     os.path.join('Assets', 'parallax-space-backgound.png'))
 IMG_GAME_BACKGROUND = pygame.image.load(
-    os.path.join('Assets', 'background-black.png'))
-IMG_SPACESHIP_DEFAULT = pygame.image.load(
-    os.path.join('Assets', 'spaceship_red.png'))
+    os.path.join('Assets', 'background','space_background.png'))
 
 IMG_ENNEMY_SPACESHIP_YELLOW = pygame.image.load(
     os.path.join('Assets', 'pixel_ship_yellow.png')) #pygame.transform.scale()
@@ -62,8 +59,8 @@ IMG_ENNEMY_SPACESHIP_YELLOW = pygame.image.load(
 
 RED_LASER = pygame.image.load(os.path.join("Assets", "pixel_laser_red.png"))
 
-IMG_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(
-    IMG_SPACESHIP_DEFAULT, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 180)
+IMG_PLAYER = IMG_PLAYER_CENTER1 = pygame.transform.scale(pygame.image.load(os.path.join
+    ('Assets', 'player', 'center1.png')),(SPACESHIP_WIDTH, SPACESHIP_HEIGHT))
 
 LVL_INIT = True
 
@@ -111,7 +108,7 @@ MENU_SELECTED = start_game
 
 
 player = fclass.Player((WIDTH- SPACESHIP_WIDTH)/2, HEIGHT * 0.75,
-                 SPACESHIP_WIDTH, SPACESHIP_HEIGHT, IMG_SPACESHIP, RED_LASER)
+                 SPACESHIP_WIDTH, SPACESHIP_HEIGHT, IMG_PLAYER, RED_LASER)
 
 def draw_menu(text_blink, text_scroll, surface):
     "draw the start menu, text_scroll can be up, down or none"
@@ -171,22 +168,23 @@ def draw_lose(surface, text_blink):
     pygame.display.update()
     return text_blink
 
-def wave_ennemies(level):
+def wave_ennemies(nb_level):
     "Spawn a wave of ennemies depending of the level"
-    list_ennemies = []
-    list_type = ["littlelevel"] * level[0]
-    random.shuffle(list_type)
+    global LIST_LEVEL
+    list_ennemies = LIST_LEVEL[nb_level]
+    random.shuffle(list_ennemies)
 
-    number = len(list_type)
+    number = len(list_ennemies)
     abscisse = random.randrange(40, 65)       #trouver moyen de fix ça
     ordonnee = 0
-    for _ in range(number):
+    for i in range(number):
         if abscisse > WIDTH:
-            abscisse = random.randrange(50, 185) 
+            abscisse = random.randrange(50, 185)
             ordonnee -= random.randrange(150, 255)
         ord_rel = random.randrange(0, 80)
-        ennemy = fclass.Ennemy(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH, SPACESHIP_HEIGHT,
-         IMG_ENNEMY_SPACESHIP_YELLOW, RED_LASER,10)
+        if list_ennemies[i] == "little":
+            ennemy = fclass.Little_Ennemy(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH,
+            SPACESHIP_HEIGHT, 10, random.choice(["red", "blue", "green"]))
         list_ennemies.append(ennemy)
         abscisse += ennemy.get_width() + random.randrange(85, 245)
     return list_ennemies
@@ -206,6 +204,8 @@ def move_ennemies(ennemies):
             ennemies.remove(ennemy)
         elif not ennemy.not_off_screen(HEIGHT): #todo enlever ces doubles negations
             ennemies.remove(ennemy)
+            global LIFE_LEFT
+            LIFE_LEFT -= 1
 
 
 
@@ -213,6 +213,7 @@ def main():
     "main loop"
     clock = pygame.time.Clock()
     text_blink = 0
+    blink_player = 0
     text_scroll = None
     global DIFFICULTY_NUMBER
     global LIFE_LEFT
@@ -276,10 +277,10 @@ def main():
             if LVL_INIT:
                 ennemies, LVL_INIT = init_lvl()
             keys = pygame.key.get_pressed()
-            player.move(keys, VELOCITY_PLAYER, MAIN_WIN_SIZE)
+            blink_player = player.move(keys, VELOCITY_PLAYER, MAIN_WIN_SIZE, blink_player)
             move_ennemies(ennemies)
             for ennemy in ennemies:
-                if random.randrange(0, 2*60) == 1:
+                if random.randrange(0, 2*60) == 1 and len(ennemy.lasers)<2:
                     ennemy.shoot()
             player.move_lasers(-VELOCITY_LASER_PLAYER, ennemies, HEIGHT)
 
@@ -289,9 +290,9 @@ def main():
             draw_game(ennemies, MAIN_WIN)
             if LIFE_LEFT <= 0:
                 CURRENT_LEVEL   = 1
-                LIFE_LEFT       = 1
+                LIFE_LEFT       = 3
                 player = fclass.Player((WIDTH- SPACESHIP_WIDTH)/2, HEIGHT * 0.75,
-                 SPACESHIP_WIDTH, SPACESHIP_HEIGHT, IMG_SPACESHIP, RED_LASER)
+                 SPACESHIP_WIDTH, SPACESHIP_HEIGHT, IMG_PLAYER, RED_LASER)
                 for ennemy in ennemies:
                     ennemy.destroy()
                 ennemies = None
