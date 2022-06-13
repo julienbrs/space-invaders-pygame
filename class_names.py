@@ -59,6 +59,27 @@ IMG_ENN_MEDIUM_BLUE = pygame.transform.rotate(pygame.transform.scale(pygame.imag
 
 
 
+IMG_ENN_BIG_GREEN = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join
+    ('Assets', 'ennemies', 'big_green.png')), (60, 51)), 270)
+
+IMG_ENN_BIG_RED = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join
+    ('Assets', 'ennemies', 'big_red.png')), (60, 51)), 270)
+
+IMG_ENN_BIG_BLUE = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join
+    ('Assets', 'ennemies', 'big_blue.png')), (60, 51)), 270)
+
+
+
+
+IMG_ENN_HUGE_GREEN = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join
+    ('Assets', 'ennemies', 'huge_green.png')), (60, 51)), 270)
+
+IMG_ENN_HUGE_RED = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join
+    ('Assets', 'ennemies', 'huge_red.png')), (60, 51)), 270)
+
+IMG_ENN_HUGE_BLUE = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join
+    ('Assets', 'ennemies', 'huge_blue.png')), (60, 51)), 270)
+
 
 
 GREEN_MISSILE = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join(
@@ -231,10 +252,6 @@ class Ennemy(Shooter):
         self.height     = height
 
 
-    def move(self, velocity):
-        "move the item, velocity can also change the direction + or -"
-        self.y += velocity
-
     def move_lasers(self,player, vel, height):
         "move lasers and check if collision with player"
         for laser in self.lasers:
@@ -267,12 +284,17 @@ class Little_Ennemy(Ennemy):
                 "green": (IMG_ENN_LITTLE_GREEN, GREEN_MISSILE),
                 "blue": (IMG_ENN_LITTLE_BLUE, BLUE_MISSILE)
                 }
-    def __init__(self, x, y, width, height, maxlife, color):
+    def __init__(self, x, y, width, height, maxlife, vel, color):
         img, img_laser = self.COLOR_MAP[color]
         super().__init__(x, y, width, height, maxlife)
         self.img = img
+        self.vel = vel
         self.img_laser = img_laser
         self.mask       = pygame.mask.from_surface(self.img)
+
+    def move(self):
+        "move the item, velocity can also change the direction + or -"
+        self.y += self.vel
 
 class Lit_Med(Ennemy):
     COLOR_MAP = {
@@ -280,22 +302,67 @@ class Lit_Med(Ennemy):
                 "green": (IMG_ENN_LIT_MED_GREEN, GREEN_MISSILE),
                 "blue": (IMG_ENN_LIT_MED_BLUE, BLUE_MISSILE)
                 }
-    def __init__(self, x, y, width, height, maxlife, color):
+    def __init__(self, x, y, width, height, maxlife, vel, color):
         img, img_laser = self.COLOR_MAP[color]
         super().__init__(x, y, width, height, maxlife)
         self.img = img
+        self.vel = vel
         self.img_laser = img_laser
         self.mask       = pygame.mask.from_surface(self.img)
 
+    def move(self):
+        "move the item, velocity can also change the direction + or -"
+        self.y += self.vel
 class Medium(Ennemy):
     COLOR_MAP = {
                 "red": (IMG_ENN_MEDIUM_RED, RED_MISSILE),
                 "green": (IMG_ENN_MEDIUM_GREEN, GREEN_MISSILE),
                 "blue": (IMG_ENN_MEDIUM_BLUE, BLUE_MISSILE)
                 }
-    def __init__(self, x, y, width, height, maxlife, color):
+    def __init__(self, x, y, width, height, maxlife, vel, color):
         img, img_laser = self.COLOR_MAP[color]
         super().__init__(x, y, width, height, maxlife)
         self.img = img
+        self.vel = vel
         self.img_laser = img_laser
         self.mask       = pygame.mask.from_surface(self.img)
+
+    def move(self):
+        "move the item, velocity can also change the direction + or -"
+        self.y += self.vel
+
+class Big(Ennemy):
+    COLOR_MAP = {
+                "red": (IMG_ENN_BIG_RED, RED_MISSILE),
+                "green": (IMG_ENN_BIG_GREEN, GREEN_MISSILE),
+                "blue": (IMG_ENN_BIG_BLUE, BLUE_MISSILE)
+                }
+    def __init__(self, x, y, width, height, maxlife, vel, color):
+        img, img_laser = self.COLOR_MAP[color]
+        super().__init__(x, y, width, height, maxlife)
+        self.img = img
+        self.vel = vel
+        self.img_laser = img_laser
+        self.mask       = pygame.mask.from_surface(self.img)
+
+    def move(self):
+        "move the item, velocity can also change the direction + or -"
+        self.y += self.vel
+
+class Huge(Ennemy):
+    COLOR_MAP = {
+                "red": (IMG_ENN_HUGE_RED, RED_MISSILE),
+                "green": (IMG_ENN_HUGE_GREEN, GREEN_MISSILE),
+                "blue": (IMG_ENN_HUGE_BLUE, BLUE_MISSILE)
+                }
+    def __init__(self, x, y, width, height, maxlife, vel, color):
+        img, img_laser = self.COLOR_MAP[color]
+        super().__init__(x, y, width, height, maxlife)
+        self.img = img
+        self.vel = vel
+        self.img_laser = img_laser
+        self.mask       = pygame.mask.from_surface(self.img)
+    
+    def move(self):
+        "move the item, velocity can also change the direction + or -"
+        self.y += self.vel

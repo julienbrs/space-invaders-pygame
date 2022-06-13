@@ -2,6 +2,7 @@
 """"
 Space invaders
 """""
+from multiprocessing.pool import INIT
 import os
 import random
 import pygame
@@ -14,7 +15,7 @@ import flevel
 FPS = 90
 
 VELOCITY_PLAYER             = 10
-VELOCITY_BOT                = 0.3
+VELOCITY_BOT                = 0.05
 MAX_LASER_PLAYER            = 15
 VELOCITY_LASER_PLAYER       = 9
 LASER_SIZE = LASER_WIDTH, LASER_HEIGHT = 18,6
@@ -173,7 +174,7 @@ def wave_ennemies(nb_level):
     global LIST_LEVEL
     list_ennemies = LIST_LEVEL[nb_level]
     random.shuffle(list_ennemies)
-
+    ennemies = []
     number = len(list_ennemies)
     abscisse = random.randrange(40, 65)       #trouver moyen de fix ça
     ordonnee = 0
@@ -182,22 +183,37 @@ def wave_ennemies(nb_level):
             abscisse = random.randrange(50, 185)
             ordonnee -= random.randrange(150, 255)
         ord_rel = random.randrange(0, 80)
-        if list_ennemies[i] == "little":
+        current = list_ennemies[i]
+        if current == "little":
             ennemy = fclass.Little_Ennemy(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH,
-            SPACESHIP_HEIGHT, 10, random.choice(["red", "blue", "green"]))
-        list_ennemies.append(ennemy)
+            SPACESHIP_HEIGHT, 10, VELOCITY_BOT * 10, random.choice(["red", "blue", "green"]))
+        elif current == "lit_med":
+            ennemy = fclass.Lit_Med(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH,
+            SPACESHIP_HEIGHT, 15, VELOCITY_BOT * 5, random.choice(["red", "blue", "green"]))
+        elif current == "medium":
+            ennemy = fclass.Medium(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH,
+            SPACESHIP_HEIGHT, 30, VELOCITY_BOT * 3, random.choice(["red", "blue", "green"]))
+        elif current == "big":
+            ennemy = fclass.Big(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH,
+            SPACESHIP_HEIGHT, 40,VELOCITY_BOT * 2, random.choice(["red", "blue", "green"]))
+        elif current == "huge":
+            ennemy = fclass.Huge(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH,
+            SPACESHIP_HEIGHT, 100, VELOCITY_BOT / 2, random.choice(["red", "blue", "green"]))
+        ennemies.append(ennemy)
         abscisse += ennemy.get_width() + random.randrange(85, 245)
-    return list_ennemies
+
+    return ennemies
 
 def init_lvl():
     "Init a lvl: spawn ennemies, return the wave and update HUD"
-    ennemies = wave_ennemies(flevel.list_level[CURRENT_LEVEL])
+    ennemies = wave_ennemies(CURRENT_LEVEL - 1)
     return ennemies, False
+
 
 def move_ennemies(ennemies):
     "move all ennemies and their lasers"
     for ennemy in ennemies:
-        ennemy.move(VELOCITY_BOT)
+        ennemy.move()
         ennemy.move_lasers(player, VELOCITY_BOT, HEIGHT)
         if ennemy.collision(player):
             player.lifebar -= 50
@@ -208,13 +224,13 @@ def move_ennemies(ennemies):
             LIFE_LEFT -= 1
 
 
-
 def main():
     "main loop"
     clock = pygame.time.Clock()
     text_blink = 0
     blink_player = 0
     text_scroll = None
+    LEVEL_FINISHED = False
     global DIFFICULTY_NUMBER
     global LIFE_LEFT
 
@@ -275,8 +291,20 @@ def main():
 
             global LVL_INIT
             if LVL_INIT:
+                LEVEL_FINISHED = False
                 ennemies, LVL_INIT = init_lvl()
             keys = pygame.key.get_pressed()
+
+            if len(ennemies) == 0:          #Mettre dans fonction
+                if not LEVEL_FINISHED:
+                    last = pygame.time.get_ticks()
+                LEVEL_FINISHED = True
+                now = pygame.time.get_ticks()
+                if now - last >= 4000:
+                    LEVEL_FINISHED  = True
+                    LVL_INIT        = True
+                    CURRENT_LEVEL   += 1
+
             blink_player = player.move(keys, VELOCITY_PLAYER, MAIN_WIN_SIZE, blink_player)
             move_ennemies(ennemies)
             for ennemy in ennemies:
