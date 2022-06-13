@@ -2,10 +2,10 @@
 """"
 Space invaders
 """""
-from multiprocessing.pool import INIT
 import os
 import random
 import pygame
+import math
 import class_names as fclass
 pygame.font.init()
 import flevel
@@ -15,7 +15,7 @@ import flevel
 FPS = 90
 
 VELOCITY_PLAYER             = 10
-VELOCITY_BOT                = 0.05
+VELOCITY_BOT                = 0.03
 MAX_LASER_PLAYER            = 15
 VELOCITY_LASER_PLAYER       = 9
 LASER_SIZE = LASER_WIDTH, LASER_HEIGHT = 18,6
@@ -172,21 +172,24 @@ def draw_lose(surface, text_blink):
 def wave_ennemies(nb_level):
     "Spawn a wave of ennemies depending of the level"
     global LIST_LEVEL
+    stage_level = nb_level // 5 + 1
     list_ennemies = LIST_LEVEL[nb_level]
     random.shuffle(list_ennemies)
     ennemies = []
     number = len(list_ennemies)
-    abscisse = random.randrange(40, 65)       #trouver moyen de fix ça
-    ordonnee = 0
+    abscisse = random.randrange(WIDTH*0.1, WIDTH*0.3)       #trouver moyen de fix ça
+    ordonnee = -50
+    ennemies_on_line = 0
     for i in range(number):
-        if abscisse > WIDTH:
-            abscisse = random.randrange(50, 185)
-            ordonnee -= random.randrange(150, 255)
+        if WIDTH - abscisse < 40 or ennemies_on_line > 4 + math.floor(nb_level*1.5):
+            ennemies_on_line = 0
+            abscisse = random.randrange(WIDTH*0.05, WIDTH*0.15)
+            ordonnee -= random.randrange(50, 350 - stage_level * 50)
         ord_rel = random.randrange(0, 80)
         current = list_ennemies[i]
         if current == "little":
-            ennemy = fclass.Little_Ennemy(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH,
-            SPACESHIP_HEIGHT, 10, VELOCITY_BOT * 10, random.choice(["red", "blue", "green"]))
+            ennemy = fclass.Little_Ennemy(abscisse , ordonnee + ord_rel, 10,
+            VELOCITY_BOT * 10, random.choice(["red", "blue", "green"]))
         elif current == "lit_med":
             ennemy = fclass.Lit_Med(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH,
             SPACESHIP_HEIGHT, 15, VELOCITY_BOT * 5, random.choice(["red", "blue", "green"]))
@@ -200,7 +203,8 @@ def wave_ennemies(nb_level):
             ennemy = fclass.Huge(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH,
             SPACESHIP_HEIGHT, 100, VELOCITY_BOT / 2, random.choice(["red", "blue", "green"]))
         ennemies.append(ennemy)
-        abscisse += ennemy.get_width() + random.randrange(85, 245)
+        ennemies_on_line += 1
+        abscisse += ennemy.get_width() + random.randrange(0, math.floor((WIDTH - abscisse) / 3))
 
     return ennemies
 
@@ -308,8 +312,7 @@ def main():
             blink_player = player.move(keys, VELOCITY_PLAYER, MAIN_WIN_SIZE, blink_player)
             move_ennemies(ennemies)
             for ennemy in ennemies:
-                if random.randrange(0, 2*60) == 1 and len(ennemy.lasers)<2:
-                    ennemy.shoot()
+                ennemy.shoot()
             player.move_lasers(-VELOCITY_LASER_PLAYER, ennemies, HEIGHT)
 
             if player.lifebar <= 0:

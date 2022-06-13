@@ -4,7 +4,9 @@ File for class
 """
 
 import pygame
+import random
 import os
+
 
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 45, 78      #already in other file
 
@@ -148,11 +150,6 @@ class Shooter():
         for laser in self.lasers:
             laser.draw(surface)
 
-    def shoot(self):
-        "shoot"
-        laser = Laser(self.x, self.y, None, self.img_laser)
-        self.lasers.append(laser)
-
     def destroyed(self, damage):
         "is touched, return True if destroyed "
         self.lifebar -= damage
@@ -234,7 +231,8 @@ class Player(Shooter):
             on_screen = True #trouver meilleur moyen ?
             for other in others:
                 if laser.collision(other):
-                    if other.destroyed(5):        #todo mettre les degats dans le jeu
+                    if other.destroyed(5):     #todo mettre les degats dans le jeu et factoriser
+                        other.destroy()
                         others.remove(other)
                     self.lasers.remove(laser)
                     on_screen = False
@@ -246,10 +244,12 @@ class Ennemy(Shooter):
     "class of the ennemy"
 
 
-    def __init__(self, x, y, width, height, maxlife):
+    def __init__(self, x, y, width, height, maxlife, cooldown):
         super().__init__(x, y, maxlife)
         self.width      = width
         self.height     = height
+        self.last = pygame.time.get_ticks()
+        self.cooldown = cooldown
 
 
     def move_lasers(self,player, vel, height):
@@ -268,8 +268,9 @@ class Ennemy(Shooter):
 
     def shoot(self):
         "shoot"
-        laser = Laser(self.x - self.width/2, self.y - self.height, None, self.img_laser)
-        self.lasers.append(laser)
+        if random.randrange(1, self.cooldown) == 20:
+            laser = Laser(self.x + self.width/2, self.y + self.height * 0.9, None, self.img_laser)
+            self.lasers.append(laser)
 
     def collision(self, other):
         "collision"
@@ -284,9 +285,11 @@ class Little_Ennemy(Ennemy):
                 "green": (IMG_ENN_LITTLE_GREEN, GREEN_MISSILE),
                 "blue": (IMG_ENN_LITTLE_BLUE, BLUE_MISSILE)
                 }
-    def __init__(self, x, y, width, height, maxlife, vel, color):
+    def __init__(self, x, y, maxlife, vel, color):
         img, img_laser = self.COLOR_MAP[color]
-        super().__init__(x, y, width, height, maxlife)
+        height = img.get_height()
+        width = img.get_width()
+        super().__init__(x, y, width, height, maxlife, 180)
         self.img = img
         self.vel = vel
         self.img_laser = img_laser
@@ -304,7 +307,7 @@ class Lit_Med(Ennemy):
                 }
     def __init__(self, x, y, width, height, maxlife, vel, color):
         img, img_laser = self.COLOR_MAP[color]
-        super().__init__(x, y, width, height, maxlife)
+        super().__init__(x, y, width, height, maxlife, 270)     #mettre en lien avec FPS
         self.img = img
         self.vel = vel
         self.img_laser = img_laser
@@ -321,7 +324,7 @@ class Medium(Ennemy):
                 }
     def __init__(self, x, y, width, height, maxlife, vel, color):
         img, img_laser = self.COLOR_MAP[color]
-        super().__init__(x, y, width, height, maxlife)
+        super().__init__(x, y, width, height, maxlife, 90)
         self.img = img
         self.vel = vel
         self.img_laser = img_laser
@@ -339,7 +342,7 @@ class Big(Ennemy):
                 }
     def __init__(self, x, y, width, height, maxlife, vel, color):
         img, img_laser = self.COLOR_MAP[color]
-        super().__init__(x, y, width, height, maxlife)
+        super().__init__(x, y, width, height, maxlife, 300)
         self.img = img
         self.vel = vel
         self.img_laser = img_laser
@@ -357,7 +360,7 @@ class Huge(Ennemy):
                 }
     def __init__(self, x, y, width, height, maxlife, vel, color):
         img, img_laser = self.COLOR_MAP[color]
-        super().__init__(x, y, width, height, maxlife)
+        super().__init__(x, y, width, height, maxlife, 450)
         self.img = img
         self.vel = vel
         self.img_laser = img_laser
