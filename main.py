@@ -1,6 +1,6 @@
 # pylint: disable=no-member
 """"
-Space invaders
+Space invaders 
 """""
 import os
 import random
@@ -14,14 +14,14 @@ import flevel
 # Variables globales
 FPS = 90
 
-VELOCITY_PLAYER             = 10
-VELOCITY_BOT                = 0.03
-MAX_LASER_PLAYER            = 15
+VELOCITY_PLAYER             = 8
+VELOCITY_BOT                = 0.05 
+MAX_LASER_PLAYER            = 8
 VELOCITY_LASER_PLAYER       = 9
 LASER_SIZE = LASER_WIDTH, LASER_HEIGHT = 18,6
 
-CURRENT_LEVEL   = 1
-LIFE_LEFT       = 3
+CURRENT_LEVEL   = 10
+LIFE_LEFT       = 100
 MAX_LEVEL       = 25
 LIST_LEVEL      = flevel.create_list_level(MAX_LEVEL)
 pygame.display.set_caption("Space Invaders")
@@ -31,6 +31,7 @@ GREY    = (125, 125, 125)
 LIGHT_GREY = (175, 175, 175)
 
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 45, 78
+
 
 FONT_MENU_WELCOME = pygame.font.SysFont("comicsans", 120)
 FONT_MENU_START = pygame.font.SysFont("comicsans", 55)
@@ -58,7 +59,6 @@ IMG_ENNEMY_SPACESHIP_YELLOW = pygame.image.load(
     os.path.join('Assets', 'pixel_ship_yellow.png')) #pygame.transform.scale()
 
 
-RED_LASER = pygame.image.load(os.path.join("Assets", "pixel_laser_red.png"))
 
 IMG_PLAYER = IMG_PLAYER_CENTER1 = pygame.transform.scale(pygame.image.load(os.path.join
     ('Assets', 'player', 'center1.png')),(SPACESHIP_WIDTH, SPACESHIP_HEIGHT))
@@ -108,8 +108,7 @@ start_game.next_text, start_game.prev_text = difficulty, leaderboard
 MENU_SELECTED = start_game
 
 
-player = fclass.Player((WIDTH- SPACESHIP_WIDTH)/2, HEIGHT * 0.75,
-                 SPACESHIP_WIDTH, SPACESHIP_HEIGHT, IMG_PLAYER, RED_LASER)
+player = fclass.Player(WIDTH/2, HEIGHT*0.9, IMG_PLAYER)
 
 def draw_menu(text_blink, text_scroll, surface):
     "draw the start menu, text_scroll can be up, down or none"
@@ -136,7 +135,7 @@ def draw_menu(text_blink, text_scroll, surface):
     pygame.display.update()
     return text_blink, text_scroll
 
-def draw_game(ennemies, surface):
+def draw_game(ennemies, list_item, surface):
     "Draw the game"
     surface.blit(pygame.transform.scale(IMG_GAME_BACKGROUND, MAIN_WIN_SIZE), (0,0))
 
@@ -146,10 +145,24 @@ def draw_game(ennemies, surface):
 
     surface.blit(text_hud_life, (WIDTH * 0.85, 50))
     surface.blit(text_hud_lvl, (WIDTH * 0.85, 110))
+    if player.shield_cooldown_text is not None:
+        text_hud_shield  = FONT_HUD.render(f"Shield : {player.shield_cooldown_text // 1000}s", 1, LIGHT_GREY)
+        surface.blit(text_hud_shield, (WIDTH * 0.75, 400))
+
 
     for ennemy in ennemies:
         ennemy.draw(MAIN_WIN)
+    
+    for item in list_item:
+        item.draw(MAIN_WIN)
     player.draw(MAIN_WIN)
+
+    for explosion in fclass.LIST_EXPLOSION:
+        explosion.handle(20)
+        explosion.draw(MAIN_WIN)
+        if explosion.timer_explosion == -1:
+            fclass.LIST_EXPLOSION.remove(explosion)
+    
     pygame.display.update()
 
 def draw_lose(surface, text_blink):
@@ -181,27 +194,27 @@ def wave_ennemies(nb_level):
     ordonnee = -50
     ennemies_on_line = 0
     for i in range(number):
-        if WIDTH - abscisse < 40 or ennemies_on_line > 4 + math.floor(nb_level*1.5):
+        if WIDTH - abscisse < 100 or ennemies_on_line > 4 + math.floor(nb_level*1.5):
             ennemies_on_line = 0
             abscisse = random.randrange(WIDTH*0.05, WIDTH*0.15)
             ordonnee -= random.randrange(50, 350 - stage_level * 50)
         ord_rel = random.randrange(0, 80)
         current = list_ennemies[i]
         if current == "little":
-            ennemy = fclass.Little_Ennemy(abscisse , ordonnee + ord_rel, 10,
-            VELOCITY_BOT * 10, random.choice(["red", "blue", "green"]))
+            ennemy = fclass.Little_Ennemy(
+                abscisse , ordonnee + ord_rel, random.choice(["red", "blue", "green"]))
         elif current == "lit_med":
-            ennemy = fclass.Lit_Med(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH,
-            SPACESHIP_HEIGHT, 15, VELOCITY_BOT * 5, random.choice(["red", "blue", "green"]))
+            ennemy = fclass.Lit_Med(
+                abscisse , ordonnee + ord_rel, random.choice(["red", "blue", "green"]))
         elif current == "medium":
-            ennemy = fclass.Medium(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH,
-            SPACESHIP_HEIGHT, 30, VELOCITY_BOT * 3, random.choice(["red", "blue", "green"]))
+            ennemy = fclass.Medium(
+                abscisse , ordonnee + ord_rel, random.choice(["red", "blue", "green"]))
         elif current == "big":
-            ennemy = fclass.Big(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH,
-            SPACESHIP_HEIGHT, 40,VELOCITY_BOT * 2, random.choice(["red", "blue", "green"]))
+            ennemy = fclass.Big(
+                abscisse , ordonnee + ord_rel, random.choice(["red", "blue", "green"]))
         elif current == "huge":
-            ennemy = fclass.Huge(abscisse , ordonnee + ord_rel, SPACESHIP_WIDTH,
-            SPACESHIP_HEIGHT, 100, VELOCITY_BOT / 2, random.choice(["red", "blue", "green"]))
+            ennemy = fclass.Huge(
+                abscisse , ordonnee + ord_rel, random.choice(["red", "blue", "green"]))
         ennemies.append(ennemy)
         ennemies_on_line += 1
         abscisse += ennemy.get_width() + random.randrange(0, math.floor((WIDTH - abscisse) / 3))
@@ -213,19 +226,48 @@ def init_lvl():
     ennemies = wave_ennemies(CURRENT_LEVEL - 1)
     return ennemies, False
 
-
 def move_ennemies(ennemies):
     "move all ennemies and their lasers"
     for ennemy in ennemies:
         ennemy.move()
-        ennemy.move_lasers(player, VELOCITY_BOT, HEIGHT)
+        ennemy.move_lasers(player, HEIGHT)
         if ennemy.collision(player):
-            player.lifebar -= 50
+            if player.shield_cooldown is not None:
+                player.shield_cooldown = None       #grouper dans fonction
+                player.shield_img = None
+                player.shield_cooldown_text = None
+            else:
+                player.lifebar -= 100
             ennemies.remove(ennemy)
         elif not ennemy.not_off_screen(HEIGHT): #todo enlever ces doubles negations
             ennemies.remove(ennemy)
             global LIFE_LEFT
             LIFE_LEFT -= 1
+
+def spawn_item(level):
+    list_item_spawned = []
+    list_item_possible = [spawn_item_health, spawn_item_shield, spawn_item_multiple_shoot]
+    nb_item_max = random.randrange(2* (level // 5), 2 * (level // 5 + 1) )
+    nb_item_max = 3
+    for _ in range(nb_item_max):
+        x = random.randrange(WIDTH * 0.1, WIDTH * 0.9)
+        y = random.randrange(HEIGHT * 0.2, HEIGHT * 0.9)
+        #item = random.choice(list_item_possible)(surface, x, y)
+        item = spawn_item_shield(x, y)
+        list_item_spawned.append(item)
+    return list_item_spawned
+
+def spawn_item_health(x, y):
+    item = fclass.Item_Health(x, y)
+    return item
+
+def spawn_item_shield(x, y):
+    item = fclass.Item_Shield(x, y)
+    return item
+
+def spawn_item_multiple_shoot(x, y):
+    pass
+
 
 
 def main():
@@ -296,7 +338,9 @@ def main():
             global LVL_INIT
             if LVL_INIT:
                 LEVEL_FINISHED = False
-                ennemies, LVL_INIT = init_lvl()
+                list_item = spawn_item(CURRENT_LEVEL)
+                for item in list_item:
+                    ennemies, LVL_INIT = init_lvl()
             keys = pygame.key.get_pressed()
 
             if len(ennemies) == 0:          #Mettre dans fonction
@@ -309,23 +353,33 @@ def main():
                     LVL_INIT        = True
                     CURRENT_LEVEL   += 1
 
-            blink_player = player.move(keys, VELOCITY_PLAYER, MAIN_WIN_SIZE, blink_player)
+            blink_player = player.move(keys, VELOCITY_PLAYER, MAIN_WIN_SIZE, blink_player)      #utiliser classe
+            for item in list_item:
+                if item.collision(player):      #mettre dans fonction
+                    item.effect(player)
+                    list_item.remove(item)
+            
+            if player.shield_cooldown != None:
+                player.handle_shield()
             move_ennemies(ennemies)
             for ennemy in ennemies:
-                ennemy.shoot()
+                if ennemy.came_on_screen():
+                    ennemy.shoot()
+
+                
             player.move_lasers(-VELOCITY_LASER_PLAYER, ennemies, HEIGHT)
 
             if player.lifebar <= 0:
                 player.lifebar = player.maxlife
                 LIFE_LEFT -= 1
-            draw_game(ennemies, MAIN_WIN)
+            draw_game(ennemies, list_item, MAIN_WIN)
             if LIFE_LEFT <= 0:
-                CURRENT_LEVEL   = 1
+                CURRENT_LEVEL   = 9
                 LIFE_LEFT       = 3
-                player = fclass.Player((WIDTH- SPACESHIP_WIDTH)/2, HEIGHT * 0.75,
-                 SPACESHIP_WIDTH, SPACESHIP_HEIGHT, IMG_PLAYER, RED_LASER)
+                player = fclass.Player(WIDTH/2, HEIGHT*0.9, IMG_PLAYER)
                 for ennemy in ennemies:
                     ennemy.destroy()
+
                 ennemies = None
                 LVL_INIT = True
                 run_game = False
