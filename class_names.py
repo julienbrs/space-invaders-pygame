@@ -3,6 +3,7 @@
 File for class
 """
 
+from cmath import e
 from time import time
 from tkinter import N
 import pygame
@@ -132,8 +133,12 @@ BASIC_LASER_PLAYER = pygame.transform.rotate(pygame.transform.scale(pygame.image
     os.path.join("Assets", "laser", "basic_laser_player.png")), (65, 45)), 90)
 
 
-HUGE_LASER = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join(
-    "Assets", "laser", "huge_missile.png")), (232, 132)), 270)
+HUGE_RED_LASER = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join(
+    "Assets", "laser", "red_missile.png")), (233, 134)), 270)
+HUGE_LASER_RED = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join(
+    "Assets", "laser", "basic_red_orb.png")), (275, 125)), 270)
+HUGE_LASER_BLUE = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join(
+    "Assets", "laser", "basic_blue_orb.png")), (275, 125)), 270)
 
 
 
@@ -143,6 +148,9 @@ ITEM_HEALTH = pygame.transform.scale(pygame.image.load(os.path.join(
 
 ITEM_SHIELD = pygame.transform.scale(pygame.image.load(os.path.join(
     "Assets", "items", "shield.png")), (50, 50))
+
+ITEM_MULTIPLE_SHOOT = pygame.transform.scale(pygame.image.load(os.path.join(
+    "Assets", "items", "multiple_shoot.png")), (50, 50))
 
 SHIELD_EFFECT = pygame.transform.scale(pygame.image.load(os.path.join(
     "Assets", "items", "shield_effect.png")), (80, 80))
@@ -214,9 +222,10 @@ class Laser():
         "move the item, velocity can also change the direction + or -"
         self.y += velocity
 
-    def off_screen(self, height):
+    def off_screen(self, height, width):
         "check if item isn't off the screen"
-        return self.y + self.img.get_height() >= 0  and self.y <= height
+        return (self.y + self.img.get_height() >= 0  and self.y <= height and
+            self.x + self.img.get_width() >= 0 and self.x <= width)
 
     def collision(self, obj):
         "check a collision"
@@ -230,6 +239,8 @@ class Shooter():
         self.x = x
         self.y = y
         self.lasers = []
+        self.lasers_left = []
+        self.lasers_right = []
         self.lifebar = maxlife
         self.maxlife = maxlife
         self.shield_img = None
@@ -240,12 +251,16 @@ class Shooter():
         "draw item"
         surface.blit(self.img, (self. x, self.y))
         if self.shield_img is not None:
-            surface.blit(self.shield_img, (self.x - self.get_width() / 2, self.y - 15))
+            surface.blit(self.shield_img, (self.x - self.get_width() / 3.5, self.y - 15))
 
         percentage_life = self.lifebar / self.maxlife
         pygame.draw.line(surface, RED, (self.x*1.01, self.y + self.get_height() + 5),
          (self.x + 0.95*self.get_width()*percentage_life,self.y + self.get_height() + 5), width=2)
         for laser in self.lasers:
+            laser.draw(surface)
+        for laser in self.lasers_right:
+            laser.draw(surface)
+        for laser in self.lasers_left:
             laser.draw(surface)
 
     def touched(self, damage):
@@ -282,11 +297,23 @@ class Player(Shooter):
         self.shield_cooldown = None
         self.shield_cooldown_text = None
 
+        self.multiple_shoot_cooldown = None
+        self.multiple_shoot_cooldown_text = None
+
 
     def shoot(self):
         "shoot"
         laser = Laser(self.x + self.width/2 - self.img_laser.get_width()/2, self.y - self.height/2, None, self.img_laser)
         self.lasers.append(laser)
+
+        if self.multiple_shoot_cooldown is not None:
+            img_laser_left = pygame.transform.rotate(self.img_laser, 315)
+            img_laser_right = pygame.transform.rotate(self.img_laser, 45)
+
+            laser_left = Laser(self.x + self.width/2 - self.img_laser.get_width()/2, self.y - self.height/2, None, img_laser_left)
+            laser_right = Laser(self.x - self.img_laser.get_width()/2, self.y - self.height/2, None, img_laser_right)
+            self.lasers_left.append(laser_left)
+            self.lasers_right.append(laser_right)
 
     def collision(self, other):
         "collision"
@@ -326,7 +353,7 @@ class Player(Shooter):
         
 
 
-    def move_lasers(self, velocity, others, height):
+    def move_lasers(self, velocity, others, height, width):
         """move lasers of the shooter, check if collision with others, can
         change the direction with sign of velocity"""
         for laser in self.lasers:
@@ -343,8 +370,49 @@ class Player(Shooter):
                     except:
                         print("laser not in list anymore but still removing")
                     on_screen = False
-            if on_screen and not laser.off_screen(height):
+            if on_screen and not laser.off_screen(height, width):
                 self.lasers.remove(laser)
+        
+        if self.multiple_shoot_cooldown is not None:
+            for laser in self.lasers_left:
+                laser.move(velocity)
+                laser.x -= velocity
+
+                on_screen = True #trouver meilleur moyen ?
+                for other in others:
+                    if laser.collision(other):
+                        if other.touched(self.damage):     #todo mettre les degats dans le jeu et factoriser
+                            other.destroy()
+                            others.remove(other)
+                        try:
+                            self.lasers_left.remove(laser)
+                        except:
+                            print("laser not in list anymore but still removing")
+                        on_screen = False
+                if on_screen and not laser.off_screen(height, width):
+                    self.lasers_left.remove(laser)
+
+            for laser in self.lasers_right:
+                laser.move(velocity)
+                laser.x += velocity
+
+                on_screen = True #trouver meilleur moyen ?
+                for other in others:
+                    if laser.collision(other):
+                        if other.touched(self.damage):     #todo mettre les degats dans le jeu et factoriser
+                            other.destroy()
+                            others.remove(other)
+                        try:
+                            self.lasers_right.remove(laser)
+                        except:
+                            print("laser not in list anymore but still removing")
+                        on_screen = False
+                if on_screen and not laser.off_screen(height, width):
+                    self.lasers_right.remove(laser)
+
+        else:
+            self.lasers_left = []
+            self.lasers_right = []
 
     def handle_shield(self):
         "when shield cooldown != None"
@@ -358,6 +426,19 @@ class Player(Shooter):
             self.shield_cooldown = None
             self.shield_img = None
             self.shield_cooldown_text = None
+    
+    def handle_multiple_shoot(self):
+        "when shield cooldown != None"
+        now = pygame.time.get_ticks()
+        time_elapsed = now - self.multiple_shoot_cooldown
+        if time_elapsed > 975:
+            self.multiple_shoot_cooldown_text = (self.multiple_shoot_cooldown_text - time_elapsed)
+            self.multiple_shoot_cooldown = pygame.time.get_ticks()
+
+        if  self.multiple_shoot_cooldown_text < 100:
+            self.multiple_shoot_cooldown = None
+            self.multiple_shoot_cooldown_text = None
+    
 
 
 
@@ -380,11 +461,11 @@ class Ennemy(Shooter):
         "move the item, velocity can also change the direction + or -"
         self.y += self.vel
     
-    def move_lasers(self,player, height):
+    def move_lasers(self,player, height, width):
         "move lasers and check if collision with player"
         for laser in self.lasers:
             laser.move(self.vel_laser)
-            if not laser.off_screen(height): #fixer le nom aussi ici
+            if not laser.off_screen(height, width): #fixer le nom aussi ici
                 self.lasers.remove(laser)
             if laser.collision(player):
                 if player.shield_cooldown != None:
@@ -477,15 +558,15 @@ class Big(Ennemy):
 
 class Huge(Ennemy):
     COLOR_MAP = {
-                "red": (IMG_ENN_HUGE_RED, HUGE_LASER),
-                "green": (IMG_ENN_HUGE_GREEN, HUGE_LASER),
-                "blue": (IMG_ENN_HUGE_BLUE, HUGE_LASER)
+                "red": (IMG_ENN_HUGE_RED, HUGE_RED_LASER),
+                "green": (IMG_ENN_HUGE_GREEN, HUGE_RED_LASER),
+                "blue": (IMG_ENN_HUGE_BLUE, HUGE_RED_LASER)
                 }
     def __init__(self, x, y, color):
         img, img_laser = self.COLOR_MAP[color]
         height = img.get_height()
         width = img.get_width()
-        super().__init__(x, y, width, height, 500, 350, VELOCITY_BOT / 2, VELOCITY_BOT * 90, 60)    #400
+        super().__init__(x, y, width, height, 500, 350, VELOCITY_BOT / 2, VELOCITY_BOT * 280, 60)    #400
         self.img = img
         self.img_laser = img_laser
         self.mask       = pygame.mask.from_surface(self.img)
@@ -547,6 +628,15 @@ class Item_Shield(Item):
         super().__init__(x, y, ITEM_SHIELD)
 
     def effect(self, player):
-        player.shield_img = pygame.transform.scale(SHIELD_EFFECT, (player.height* 1.2, player.height * 1.3))
+        player.shield_img = pygame.transform.scale(SHIELD_EFFECT, (player.height* 0.9, player.height * 1.3))
         player.shield_cooldown = pygame.time.get_ticks()
         player.shield_cooldown_text = 30000
+
+
+class Item_Multiple_Shoot(Item):
+    def __init__(self, x, y):
+        super().__init__(x, y, ITEM_MULTIPLE_SHOOT)
+
+    def effect(self, player):
+        player.multiple_shoot_cooldown = pygame.time.get_ticks()
+        player.multiple_shoot_cooldown_text = 20000

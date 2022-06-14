@@ -14,7 +14,7 @@ def create_list_level(max_level):
         list_nb_ennemies.append(5  + 2*i)
         list_nb_ennemies.append(2*i)
         list_nb_ennemies.append(round(2*1.5))
-        list_nb_ennemies.append(2*math.floor(i/5))
+        list_nb_ennemies.append(40*math.floor(i/5))
 
         if i < 5:
             list_nb_ennemies[2],list_nb_ennemies[3] , list_nb_ennemies[4] = 0, 0, 0

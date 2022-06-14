@@ -148,6 +148,11 @@ def draw_game(ennemies, list_item, surface):
     if player.shield_cooldown_text is not None:
         text_hud_shield  = FONT_HUD.render(f"Shield : {player.shield_cooldown_text // 1000}s", 1, LIGHT_GREY)
         surface.blit(text_hud_shield, (WIDTH * 0.75, 400))
+    
+    if player.multiple_shoot_cooldown_text is not None:
+        text_hud_multiple_shoot  = FONT_HUD.render(f"Super Shoot : {player.multiple_shoot_cooldown_text // 1000}s",
+         1, LIGHT_GREY)
+        surface.blit(text_hud_multiple_shoot, (WIDTH * 0.70, 550))
 
 
     for ennemy in ennemies:
@@ -230,7 +235,7 @@ def move_ennemies(ennemies):
     "move all ennemies and their lasers"
     for ennemy in ennemies:
         ennemy.move()
-        ennemy.move_lasers(player, HEIGHT)
+        ennemy.move_lasers(player, HEIGHT, WIDTH)
         if ennemy.collision(player):
             if player.shield_cooldown is not None:
                 player.shield_cooldown = None       #grouper dans fonction
@@ -247,13 +252,11 @@ def move_ennemies(ennemies):
 def spawn_item(level):
     list_item_spawned = []
     list_item_possible = [spawn_item_health, spawn_item_shield, spawn_item_multiple_shoot]
-    nb_item_max = random.randrange(2* (level // 5), 2 * (level // 5 + 1) )
-    nb_item_max = 3
+    nb_item_max = random.randrange(2* (level // 5), 4  * (level // 5 + 1) )
     for _ in range(nb_item_max):
         x = random.randrange(WIDTH * 0.1, WIDTH * 0.9)
         y = random.randrange(HEIGHT * 0.2, HEIGHT * 0.9)
-        #item = random.choice(list_item_possible)(surface, x, y)
-        item = spawn_item_shield(x, y)
+        item = random.choice(list_item_possible)(x, y)
         list_item_spawned.append(item)
     return list_item_spawned
 
@@ -266,7 +269,8 @@ def spawn_item_shield(x, y):
     return item
 
 def spawn_item_multiple_shoot(x, y):
-    pass
+    item = fclass.Item_Multiple_Shoot(x, y)
+    return item
 
 
 
@@ -361,13 +365,16 @@ def main():
             
             if player.shield_cooldown != None:
                 player.handle_shield()
+            
+            if player.multiple_shoot_cooldown != None:
+                player.handle_multiple_shoot()
+
             move_ennemies(ennemies)
             for ennemy in ennemies:
                 if ennemy.came_on_screen():
                     ennemy.shoot()
-
                 
-            player.move_lasers(-VELOCITY_LASER_PLAYER, ennemies, HEIGHT)
+            player.move_lasers(-VELOCITY_LASER_PLAYER, ennemies, HEIGHT, WIDTH)
 
             if player.lifebar <= 0:
                 player.lifebar = player.maxlife
