@@ -12,12 +12,14 @@ def create_list_level(max_level):
 
         list_nb_ennemies.append(30 + math.floor(i*1))
         list_nb_ennemies.append(5  + 2*i)
+        list_nb_ennemies.append(4*i)
         list_nb_ennemies.append(2*i)
-        list_nb_ennemies.append(round(2*1.5))
-        list_nb_ennemies.append(40*math.floor(i/5))
+        list_nb_ennemies.append(3*math.floor(i/5))
 
         if i < 5:
             list_nb_ennemies[2],list_nb_ennemies[3] , list_nb_ennemies[4] = 0, 0, 0
+        
+        #list_nb_ennemies = [1,1,0,0,0]
         for j in range(5):
             tmp = [list_type_enemies[j]]*list_nb_ennemies[j]
             level += tmp

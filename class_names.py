@@ -8,10 +8,36 @@ from time import time
 from tkinter import N
 import pygame
 import random
+
+pygame.mixer.init()
 import os
 
 VELOCITY_BOT  = 0.03
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 45, 78      #already in other file
+
+SOUND_PLAYER_HIT = pygame.mixer.Sound(
+    os.path.join('Assets', 'sound_effects', 'explosion', 'player_hit.wav'))
+pygame.mixer.Sound.set_volume(SOUND_PLAYER_HIT, 0.4)
+
+SOUND_ENNEMY_HIT = pygame.mixer.Sound(
+    os.path.join('Assets', 'sound_effects', 'explosion', 'player_hit.wav'))
+pygame.mixer.Sound.set_volume(SOUND_ENNEMY_HIT, 0.2)
+
+SOUND_PLAYER_EXPLOSION = pygame.mixer.Sound(
+    os.path.join('Assets', 'sound_effects', 'explosion', 'player_explosion.wav'))
+pygame.mixer.Sound.set_volume(SOUND_PLAYER_EXPLOSION, 0.65)
+
+SOUND_ENNEMY_EXPLOSION = pygame.mixer.Sound(
+    os.path.join('Assets', 'sound_effects', 'explosion', 'ennemy_explosion.wav'))
+pygame.mixer.Sound.set_volume(SOUND_ENNEMY_EXPLOSION, 0.4)
+
+SOUND_LASER_PLAYER = pygame.mixer.Sound(
+    os.path.join('Assets', 'sound_effects', 'explosion', 'laser_player.wav'))
+pygame.mixer.Sound.set_volume(SOUND_LASER_PLAYER, 0.15)
+
+SOUND_POWER_UP = pygame.mixer.Sound(
+    os.path.join('Assets', 'sound_effects', 'explosion', 'powerup.wav'))
+pygame.mixer.Sound.set_volume(SOUND_POWER_UP, 0.3   )
 
 
 IMG_EXPLOSION1 = pygame.image.load(os.path.join('Assets', 'effects', 'explosion1.png'))
@@ -145,12 +171,30 @@ HUGE_LASER_BLUE = pygame.transform.rotate(pygame.transform.scale(pygame.image.lo
 #items
 ITEM_HEALTH = pygame.transform.scale(pygame.image.load(os.path.join(
     "Assets", "items", "health.png")), (50, 50))
+ITEM_HEALTH_FADE1 = pygame.transform.scale(pygame.image.load(os.path.join(
+    "Assets", "items", "health_fade1.png")), (50, 50))
+ITEM_HEALTH_FADE2 = pygame.transform.scale(pygame.image.load(os.path.join(
+    "Assets", "items", "health_fade2.png")), (50, 50))
+ITEM_HEALTH_FADE3 = pygame.transform.scale(pygame.image.load(os.path.join(
+    "Assets", "items", "health_fade3.png")), (50, 50))
 
 ITEM_SHIELD = pygame.transform.scale(pygame.image.load(os.path.join(
     "Assets", "items", "shield.png")), (50, 50))
+ITEM_SHIELD_FADE1 = pygame.transform.scale(pygame.image.load(os.path.join(
+    "Assets", "items", "shield_fade1.png")), (50, 50))
+ITEM_SHIELD_FADE2 = pygame.transform.scale(pygame.image.load(os.path.join(
+    "Assets", "items", "shield_fade2.png")), (50, 50))
+ITEM_SHIELD_FADE3 = pygame.transform.scale(pygame.image.load(os.path.join(
+    "Assets", "items", "shield_fade3.png")), (50, 50))
 
 ITEM_MULTIPLE_SHOOT = pygame.transform.scale(pygame.image.load(os.path.join(
     "Assets", "items", "multiple_shoot.png")), (50, 50))
+ITEM_MULTIPLE_SHOOT_FADE1 = pygame.transform.scale(pygame.image.load(os.path.join(
+    "Assets", "items", "multiple_shoot_fade1.png")), (50, 50))
+ITEM_MULTIPLE_SHOOT_FADE2 = pygame.transform.scale(pygame.image.load(os.path.join(
+    "Assets", "items", "multiple_shoot_fade2.png")), (50, 50))
+ITEM_MULTIPLE_SHOOT_FADE3 = pygame.transform.scale(pygame.image.load(os.path.join(
+    "Assets", "items", "multiple_shoot_fade3.png")), (50, 50))
 
 SHIELD_EFFECT = pygame.transform.scale(pygame.image.load(os.path.join(
     "Assets", "items", "shield_effect.png")), (80, 80))
@@ -305,6 +349,7 @@ class Player(Shooter):
         "shoot"
         laser = Laser(self.x + self.width/2 - self.img_laser.get_width()/2, self.y - self.height/2, None, self.img_laser)
         self.lasers.append(laser)
+        pygame.mixer.Sound.play(SOUND_LASER_PLAYER)
 
         if self.multiple_shoot_cooldown is not None:
             img_laser_left = pygame.transform.rotate(self.img_laser, 315)
@@ -362,7 +407,9 @@ class Player(Shooter):
             on_screen = True #trouver meilleur moyen ?
             for other in others:
                 if laser.collision(other):
-                    if other.touched(self.damage):     #todo mettre les degats dans le jeu et factoriser
+                    pygame.mixer.Sound.play(SOUND_ENNEMY_HIT)
+                    if other.touched(self.damage):    #todo mettre les degats dans le jeu et factoriser
+                        pygame.mixer.Sound.play(SOUND_ENNEMY_EXPLOSION)
                         other.destroy()
                         others.remove(other)
                     try:
@@ -382,6 +429,7 @@ class Player(Shooter):
                 for other in others:
                     if laser.collision(other):
                         if other.touched(self.damage):     #todo mettre les degats dans le jeu et factoriser
+                            pygame.mixer.Sound.play(SOUND_ENNEMY_EXPLOSION)
                             other.destroy()
                             others.remove(other)
                         try:
@@ -400,6 +448,7 @@ class Player(Shooter):
                 for other in others:
                     if laser.collision(other):
                         if other.touched(self.damage):     #todo mettre les degats dans le jeu et factoriser
+                            pygame.mixer.Sound.play(SOUND_ENNEMY_EXPLOSION)
                             other.destroy()
                             others.remove(other)
                         try:
@@ -471,6 +520,7 @@ class Ennemy(Shooter):
                 if player.shield_cooldown != None:
                     player.shield_cooldown -= 300 * self.damage
                 else:
+                    pygame.mixer.Sound.play(SOUND_PLAYER_HIT)
                     player.touched(self.damage)
                 self.lasers.remove(laser)
 
@@ -566,7 +616,7 @@ class Huge(Ennemy):
         img, img_laser = self.COLOR_MAP[color]
         height = img.get_height()
         width = img.get_width()
-        super().__init__(x, y, width, height, 500, 350, VELOCITY_BOT / 2, VELOCITY_BOT * 280, 60)    #400
+        super().__init__(x, y, width, height, 500, 350, VELOCITY_BOT / 2, VELOCITY_BOT * 200, 60)    #400
         self.img = img
         self.img_laser = img_laser
         self.mask       = pygame.mask.from_surface(self.img)
@@ -589,10 +639,13 @@ class Huge(Ennemy):
 class Item():
     "def class of items"
 
-    def __init__(self, x, y, img):
+    def __init__(self, x, y, img, img_fade1, img_fade2, img_fade3):
         self.x = x
         self.y = y
         self.img = img
+        self.img_fade1 = img_fade1
+        self.img_fade2 = img_fade2
+        self.img_fade3 = img_fade3
         self.mask = pygame.mask.from_surface(self.img)
         self.last = pygame.time.get_ticks()
         
@@ -601,10 +654,20 @@ class Item():
     def draw(self, surface):
         "draw item"
         now = pygame.time.get_ticks()
-        if now - self.last >= 1000:
+        time_elasped = now - self.last
+        if  time_elasped <= 700:
             surface.blit(self.img, (self. x, self.y))
-            if now - self.last >= 2000:
-                self.last = now
+        elif  701 <= time_elasped <= 1400:
+            surface.blit(self.img_fade1, (self. x, self.y))
+        elif  1401 <= time_elasped <= 2100:
+            surface.blit(self.img_fade2, (self. x, self.y))
+        elif  2101 <= time_elasped <= 2800:
+            surface.blit(self.img_fade3, (self. x, self.y))
+        elif  2801 <= time_elasped <= 3500:
+            surface.blit(self.img_fade2, (self. x, self.y))
+        else:
+            surface.blit(self.img, (self. x, self.y))
+            self.last = pygame.time.get_ticks()
 
     def collision(self, other):
         "collision"
@@ -618,14 +681,16 @@ class Item():
 
 class Item_Health(Item):
     def __init__(self, x, y):
-        super().__init__(x, y, ITEM_HEALTH)
+        super().__init__(x, y, ITEM_HEALTH, ITEM_HEALTH_FADE1,
+        ITEM_HEALTH_FADE2, ITEM_HEALTH_FADE3)
 
     def effect(self, player):
         player.lifebar = player.maxlife
 
 class Item_Shield(Item):
     def __init__(self, x, y):
-        super().__init__(x, y, ITEM_SHIELD)
+        super().__init__(x, y, ITEM_SHIELD, ITEM_SHIELD_FADE1, 
+        ITEM_SHIELD_FADE2, ITEM_SHIELD_FADE3)
 
     def effect(self, player):
         player.shield_img = pygame.transform.scale(SHIELD_EFFECT, (player.height* 0.9, player.height * 1.3))
@@ -635,7 +700,8 @@ class Item_Shield(Item):
 
 class Item_Multiple_Shoot(Item):
     def __init__(self, x, y):
-        super().__init__(x, y, ITEM_MULTIPLE_SHOOT)
+        super().__init__(x, y, ITEM_MULTIPLE_SHOOT, ITEM_MULTIPLE_SHOOT_FADE1,
+         ITEM_MULTIPLE_SHOOT_FADE2, ITEM_MULTIPLE_SHOOT_FADE3)
 
     def effect(self, player):
         player.multiple_shoot_cooldown = pygame.time.get_ticks()

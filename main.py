@@ -9,7 +9,11 @@ import math
 import class_names as fclass
 pygame.font.init()
 import flevel
+pygame.mixer.init()
 #TOdo: transparent color for the menu
+
+
+
 
 # Variables globales
 FPS = 90
@@ -20,8 +24,8 @@ MAX_LASER_PLAYER            = 8
 VELOCITY_LASER_PLAYER       = 9
 LASER_SIZE = LASER_WIDTH, LASER_HEIGHT = 18,6
 
-CURRENT_LEVEL   = 10
-LIFE_LEFT       = 100
+CURRENT_LEVEL   = 1
+LIFE_LEFT       = 2
 MAX_LEVEL       = 25
 LIST_LEVEL      = flevel.create_list_level(MAX_LEVEL)
 pygame.display.set_caption("Space Invaders")
@@ -49,11 +53,28 @@ text_menu_difficulty    = FONT_MENU_START.render(
 text_menu_leaderboard   = FONT_MENU_START.render("Leaderboard", 1, GREY)
 
 
+SOUND_SELECT_MENU = pygame.mixer.Sound(
+    os.path.join('Assets', 'sound_effects', 'menu.wav'))
+pygame.mixer.Sound.set_volume(SOUND_SELECT_MENU, 0.3)
+
 
 IMG_MENU_BACKGROUND = pygame.image.load(
     os.path.join('Assets', 'parallax-space-backgound.png'))
-IMG_GAME_BACKGROUND = pygame.image.load(
-    os.path.join('Assets', 'background','space_background.png'))
+
+
+IMG_GAME_STAGE1 = pygame.transform.scale(pygame.image.load(
+    os.path.join('Assets', 'background','stage1.png')), (WIDTH, HEIGHT))
+IMG_GAME_STAGE2 = pygame.transform.scale(pygame.image.load(
+    os.path.join('Assets', 'background','stage2.png')), (WIDTH, HEIGHT))
+IMG_GAME_STAGE3 = pygame.transform.scale(pygame.image.load(
+    os.path.join('Assets', 'background','stage3.png')), (WIDTH, HEIGHT))
+IMG_GAME_STAGE4 = pygame.transform.scale(pygame.image.load(
+    os.path.join('Assets', 'background','stage4.png')), (WIDTH, HEIGHT))
+IMG_GAME_STAGE5 = pygame.transform.scale(pygame.image.load(
+    os.path.join('Assets', 'background','stage5.png')), (WIDTH, HEIGHT))
+
+
+IMG_GAME_BACKGROUND = IMG_GAME_STAGE1
 
 IMG_ENNEMY_SPACESHIP_YELLOW = pygame.image.load(
     os.path.join('Assets', 'pixel_ship_yellow.png')) #pygame.transform.scale()
@@ -135,9 +156,20 @@ def draw_menu(text_blink, text_scroll, surface):
     pygame.display.update()
     return text_blink, text_scroll
 
-def draw_game(ennemies, list_item, surface):
+
+def draw_background(surface, img_background, i):
+    surface.fill((0,0,0))
+    surface.blit(img_background,(0,i))
+    surface.blit(img_background,(0,-HEIGHT + i))
+    if (i==HEIGHT):
+        surface.blit(img_background,(0,HEIGHT - i))
+        i=0
+    i+= 0.5
+    return i
+
+def draw_game(ennemies, list_item, surface, img_background, i):
     "Draw the game"
-    surface.blit(pygame.transform.scale(IMG_GAME_BACKGROUND, MAIN_WIN_SIZE), (0,0))
+    i = draw_background(surface, img_background, i)
 
     #Draw HUD
     text_hud_life       = FONT_HUD.render(f"Life = {LIFE_LEFT}", 1, LIGHT_GREY)
@@ -169,6 +201,7 @@ def draw_game(ennemies, list_item, surface):
             fclass.LIST_EXPLOSION.remove(explosion)
     
     pygame.display.update()
+    return i    #todo enlever ce i
 
 def draw_lose(surface, text_blink):
     "Draw the losing screen"
@@ -199,11 +232,11 @@ def wave_ennemies(nb_level):
     ordonnee = -50
     ennemies_on_line = 0
     for i in range(number):
-        if WIDTH - abscisse < 100 or ennemies_on_line > 4 + math.floor(nb_level*1.5):
+        if WIDTH - abscisse < 100 or ennemies_on_line > 7 + math.floor(nb_level*1.5):
             ennemies_on_line = 0
             abscisse = random.randrange(WIDTH*0.05, WIDTH*0.15)
-            ordonnee -= random.randrange(50, 350 - stage_level * 50)
-        ord_rel = random.randrange(0, 80)
+            ordonnee -= random.randrange(30, 80)
+        ord_rel = random.randrange(0, 40)
         current = list_ennemies[i]
         if current == "little":
             ennemy = fclass.Little_Ennemy(
@@ -242,7 +275,13 @@ def move_ennemies(ennemies):
                 player.shield_img = None
                 player.shield_cooldown_text = None
             else:
+                pygame.mixer.Sound.play(fclass.SOUND_LASER_PLAYER)
+                explosion = fclass.Explosion(player.x, player.y, player)
+                fclass.LIST_EXPLOSION.append(explosion)
                 player.lifebar -= 100
+            pygame.mixer.Sound.play(fclass.SOUND_ENNEMY_EXPLOSION)
+            explosion2 = fclass.Explosion(ennemy.x, ennemy.y, ennemy)
+            fclass.LIST_EXPLOSION.append(explosion2)
             ennemies.remove(ennemy)
         elif not ennemy.not_off_screen(HEIGHT): #todo enlever ces doubles negations
             ennemies.remove(ennemy)
@@ -252,7 +291,8 @@ def move_ennemies(ennemies):
 def spawn_item(level):
     list_item_spawned = []
     list_item_possible = [spawn_item_health, spawn_item_shield, spawn_item_multiple_shoot]
-    nb_item_max = random.randrange(2* (level // 5), 4  * (level // 5 + 1) )
+    nb_item_max = random.randrange( (level // 5) +1, 2  * (level // 5) + 6 )
+
     for _ in range(nb_item_max):
         x = random.randrange(WIDTH * 0.1, WIDTH * 0.9)
         y = random.randrange(HEIGHT * 0.2, HEIGHT * 0.9)
@@ -272,7 +312,49 @@ def spawn_item_multiple_shoot(x, y):
     item = fclass.Item_Multiple_Shoot(x, y)
     return item
 
+def init_game_stage(level, old_background):     #en fait c'est init lvl
+    
+    if level == 1:
+        pygame.mixer.music.unload()
+        pygame.mixer.music.load(os.path.join('Assets','sound_effects', 'music', 'stage1.ogg'))
+        pygame.mixer.music.set_volume(0.3)
+        pygame.mixer.music.play(-1)
+        img_background =  IMG_GAME_STAGE1
+    elif level == 6:
+        pygame.mixer.music.unload()
+        pygame.mixer.music.load(os.path.join('Assets','sound_effects', 'music', 'stage2.ogg'))
+        pygame.mixer.music.set_volume(0.3)
+        pygame.mixer.music.play(-1)
+        img_background = IMG_GAME_STAGE2
+    elif level == 11:
+        pygame.mixer.music.unload()
+        pygame.mixer.music.load(os.path.join('Assets','sound_effects', 'music', 'stage3.ogg'))
+        pygame.mixer.music.set_volume(0.3)
+        pygame.mixer.music.play(-1)
+        img_background = IMG_GAME_STAGE3
+    elif level == 16:
+        pygame.mixer.music.unload()
+        pygame.mixer.music.load(os.path.join('Assets','sound_effects', 'music', 'stage4.ogg'))
+        pygame.mixer.music.set_volume(0.3)
+        pygame.mixer.music.play(-1)
+        img_background = IMG_GAME_STAGE4
+    elif level == 21:
+        pygame.mixer.music.unload()
+        pygame.mixer.music.load(os.path.join('Assets','sound_effects', 'music', 'stage5.ogg'))
+        pygame.mixer.music.set_volume(0.3)
+        pygame.mixer.music.play(-1)
+        img_background = IMG_GAME_STAGE5
+    else:
+        img_background = old_background
+    return img_background
 
+def draw_inter_stage(level, surface):
+    surface.fill((0,0,0))
+    text_inter_stage = FONT_HUD.render(f"Stage {level // 5 + 1}", 1, LIGHT_GREY)
+
+    surface.blit(text_inter_stage, (WIDTH/2 - text_inter_stage.get_width()/2,
+    HEIGHT/2 - text_inter_stage.get_height()/2))
+    pygame.display.update()
 
 def main():
     "main loop"
@@ -292,11 +374,18 @@ def main():
     run_menu = True
     run_game = False
     run_transi = False
+    i = 0
+    img_background = IMG_GAME_STAGE1
 
+    INIT_MENU = True
     while app_run:
         while run_menu:
             clock.tick(FPS)
 
+            if INIT_MENU:
+                INIT_MENU = False
+                pygame.mixer.music.load(os.path.join('Assets','sound_effects', 'music', 'Menu_Screen.ogg'))
+                pygame.mixer.music.play(-1)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run_menu, app_run = False, False
@@ -304,18 +393,22 @@ def main():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
                         text_scroll = "UP"
+                        pygame.mixer.Sound.play(SOUND_SELECT_MENU)
                         text_blink, text_scroll = draw_menu(text_blink - 1, text_scroll, MAIN_WIN)
 
                     if event.key == pygame.K_DOWN:
                         text_scroll = "DOWN"
+                        pygame.mixer.Sound.play(SOUND_SELECT_MENU)
                         text_blink, text_scroll = draw_menu(text_blink - 1, text_scroll, MAIN_WIN)
 
                     if event.key == pygame.K_RIGHT and MENU_SELECTED == difficulty:
+                        pygame.mixer.Sound.play(SOUND_SELECT_MENU)
                         DIFFICULTY_NUMBER = (DIFFICULTY_NUMBER + 1 ) %3
                         text_menu_difficulty = FONT_MENU_START.render(
                                     f"Difficulty: {LIST_DIFFICULTY[DIFFICULTY_NUMBER]}", 1, GREY)
 
                     if event.key == pygame.K_LEFT and MENU_SELECTED == difficulty:
+                        pygame.mixer.Sound.play(SOUND_SELECT_MENU)
                         DIFFICULTY_NUMBER = (DIFFICULTY_NUMBER - 1 ) %3
                         text_menu_difficulty = FONT_MENU_START.render(
                                     f"Difficulty: {LIST_DIFFICULTY[DIFFICULTY_NUMBER]}", 1, GREY)
@@ -323,8 +416,10 @@ def main():
 
 
                     if event.key == pygame.K_RETURN and MENU_SELECTED == start_game:
+                        pygame.mixer.Sound.play(SOUND_SELECT_MENU)
                         run_menu = False
                         run_game = True
+                        INIT_MENU = True
 
             text_blink, text_scroll = draw_menu(text_blink, text_scroll, MAIN_WIN)
 
@@ -334,17 +429,24 @@ def main():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run_game, app_run = False, False
+                    INIT_MENU = True
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE and len(player.lasers) < MAX_LASER_PLAYER:
                         player.shoot()
 
+            if INIT_MENU:           #todo fusionner avec LVL_INIT ?
+                INIT_MENU = False
+
             global LVL_INIT
             if LVL_INIT:
+                img_background = init_game_stage(CURRENT_LEVEL, img_background)
                 LEVEL_FINISHED = False
+                if CURRENT_LEVEL % 5 == 1:
+                    draw_inter_stage(CURRENT_LEVEL, MAIN_WIN)
+                    pygame.time.delay(4000)
                 list_item = spawn_item(CURRENT_LEVEL)
-                for item in list_item:
-                    ennemies, LVL_INIT = init_lvl()
+                ennemies, LVL_INIT = init_lvl()
             keys = pygame.key.get_pressed()
 
             if len(ennemies) == 0:          #Mettre dans fonction
@@ -360,6 +462,7 @@ def main():
             blink_player = player.move(keys, VELOCITY_PLAYER, MAIN_WIN_SIZE, blink_player)      #utiliser classe
             for item in list_item:
                 if item.collision(player):      #mettre dans fonction
+                    pygame.mixer.Sound.play(fclass.SOUND_POWER_UP)
                     item.effect(player)
                     list_item.remove(item)
             
@@ -379,9 +482,9 @@ def main():
             if player.lifebar <= 0:
                 player.lifebar = player.maxlife
                 LIFE_LEFT -= 1
-            draw_game(ennemies, list_item, MAIN_WIN)
+            i = draw_game(ennemies, list_item, MAIN_WIN, img_background, i)
             if LIFE_LEFT <= 0:
-                CURRENT_LEVEL   = 9
+                CURRENT_LEVEL   = 1
                 LIFE_LEFT       = 3
                 player = fclass.Player(WIDTH/2, HEIGHT*0.9, IMG_PLAYER)
                 for ennemy in ennemies:
@@ -391,8 +494,15 @@ def main():
                 LVL_INIT = True
                 run_game = False
                 run_transi = True
+                INIT_MENU = True
 
         while run_transi:
+            if INIT_MENU:
+                pygame.mixer.music.unload()
+                pygame.mixer.music.load(os.path.join('Assets','sound_effects', 'music', 'defeat.ogg'))
+                pygame.mixer.music.play(-1)
+                INIT_MENU = False
+
             clock.tick(FPS)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
