@@ -3,6 +3,7 @@
 File for class
 """
 
+import os
 from cmath import e
 from time import time
 from tkinter import N
@@ -10,7 +11,6 @@ import pygame
 import random
 
 pygame.mixer.init()
-import os
 
 VELOCITY_BOT = 0.03
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 45, 78  # already in other file
@@ -26,12 +26,14 @@ SOUND_ENNEMY_HIT = pygame.mixer.Sound(
 pygame.mixer.Sound.set_volume(SOUND_ENNEMY_HIT, 0.2)
 
 SOUND_PLAYER_EXPLOSION = pygame.mixer.Sound(
-    os.path.join("Assets", "sound_effects", "explosion", "player_explosion.wav")
+    os.path.join("Assets", "sound_effects",
+                 "explosion", "player_explosion.wav")
 )
 pygame.mixer.Sound.set_volume(SOUND_PLAYER_EXPLOSION, 0.65)
 
 SOUND_ENNEMY_EXPLOSION = pygame.mixer.Sound(
-    os.path.join("Assets", "sound_effects", "explosion", "ennemy_explosion.wav")
+    os.path.join("Assets", "sound_effects",
+                 "explosion", "ennemy_explosion.wav")
 )
 pygame.mixer.Sound.set_volume(SOUND_ENNEMY_EXPLOSION, 0.4)
 
@@ -46,11 +48,16 @@ SOUND_POWER_UP = pygame.mixer.Sound(
 pygame.mixer.Sound.set_volume(SOUND_POWER_UP, 0.3)
 
 
-IMG_EXPLOSION1 = pygame.image.load(os.path.join("Assets", "effects", "explosion1.png"))
-IMG_EXPLOSION2 = pygame.image.load(os.path.join("Assets", "effects", "explosion2.png"))
-IMG_EXPLOSION3 = pygame.image.load(os.path.join("Assets", "effects", "explosion3.png"))
-IMG_EXPLOSION4 = pygame.image.load(os.path.join("Assets", "effects", "explosion4.png"))
-IMG_EXPLOSION5 = pygame.image.load(os.path.join("Assets", "effects", "explosion5.png"))
+IMG_EXPLOSION1 = pygame.image.load(
+    os.path.join("Assets", "effects", "explosion1.png"))
+IMG_EXPLOSION2 = pygame.image.load(
+    os.path.join("Assets", "effects", "explosion2.png"))
+IMG_EXPLOSION3 = pygame.image.load(
+    os.path.join("Assets", "effects", "explosion3.png"))
+IMG_EXPLOSION4 = pygame.image.load(
+    os.path.join("Assets", "effects", "explosion4.png"))
+IMG_EXPLOSION5 = pygame.image.load(
+    os.path.join("Assets", "effects", "explosion5.png"))
 
 
 IMG_PLAYER_CENTER1 = pygame.transform.scale(
@@ -83,7 +90,8 @@ IMG_PLAYER_RIGHT2 = pygame.transform.scale(
 
 IMG_ENN_LITTLE_GREEN = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "ennemies", "little_green.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "ennemies", "little_green.png")),
         (38, 32),
     ),
     270,
@@ -91,7 +99,8 @@ IMG_ENN_LITTLE_GREEN = pygame.transform.rotate(
 
 IMG_ENN_LITTLE_RED = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "ennemies", "little_red.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "ennemies", "little_red.png")),
         (38, 32),
     ),
     270,
@@ -99,7 +108,8 @@ IMG_ENN_LITTLE_RED = pygame.transform.rotate(
 
 IMG_ENN_LITTLE_BLUE = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "ennemies", "little_blue.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "ennemies", "little_blue.png")),
         (38, 32),
     ),
     270,
@@ -108,7 +118,8 @@ IMG_ENN_LITTLE_BLUE = pygame.transform.rotate(
 
 IMG_ENN_LIT_MED_GREEN = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "ennemies", "lit_med_green.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "ennemies", "lit_med_green.png")),
         (70, 63),
     ),
     270,
@@ -116,7 +127,8 @@ IMG_ENN_LIT_MED_GREEN = pygame.transform.rotate(
 
 IMG_ENN_LIT_MED_RED = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "ennemies", "lit_med_red.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "ennemies", "lit_med_red.png")),
         (70, 63),
     ),
     270,
@@ -124,7 +136,8 @@ IMG_ENN_LIT_MED_RED = pygame.transform.rotate(
 
 IMG_ENN_LIT_MED_BLUE = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "ennemies", "lit_med_blue.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "ennemies", "lit_med_blue.png")),
         (70, 63),
     ),
     270,
@@ -133,7 +146,8 @@ IMG_ENN_LIT_MED_BLUE = pygame.transform.rotate(
 
 IMG_ENN_MEDIUM_GREEN = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "ennemies", "medium_green.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "ennemies", "medium_green.png")),
         (75, 75),
     ),
     270,
@@ -141,7 +155,8 @@ IMG_ENN_MEDIUM_GREEN = pygame.transform.rotate(
 
 IMG_ENN_MEDIUM_RED = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "ennemies", "medium_red.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "ennemies", "medium_red.png")),
         (75, 75),
     ),
     270,
@@ -149,7 +164,8 @@ IMG_ENN_MEDIUM_RED = pygame.transform.rotate(
 
 IMG_ENN_MEDIUM_BLUE = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "ennemies", "medium_blue.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "ennemies", "medium_blue.png")),
         (75, 75),
     ),
     270,
@@ -166,7 +182,8 @@ IMG_ENN_BIG_GREEN = pygame.transform.rotate(
 
 IMG_ENN_BIG_RED = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "ennemies", "big_red.png")), (110, 110)
+        pygame.image.load(os.path.join(
+            "Assets", "ennemies", "big_red.png")), (110, 110)
     ),
     270,
 )
@@ -182,7 +199,8 @@ IMG_ENN_BIG_BLUE = pygame.transform.rotate(
 
 IMG_ENN_HUGE_GREEN = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "ennemies", "huge_green.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "ennemies", "huge_green.png")),
         (152, 188),
     ),
     270,
@@ -207,21 +225,24 @@ IMG_ENN_HUGE_BLUE = pygame.transform.rotate(
 
 GREEN_LASER = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "laser", "basic_green_orb.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "laser", "basic_green_orb.png")),
         (27.5, 12.5),
     ),
     270,
 )
 RED_LASER = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "laser", "basic_red_orb.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "laser", "basic_red_orb.png")),
         (27.5, 12.5),
     ),
     270,
 )
 BLUE_LASER = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "laser", "basic_blue_orb.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "laser", "basic_blue_orb.png")),
         (27.5, 12.5),
     ),
     270,
@@ -229,7 +250,8 @@ BLUE_LASER = pygame.transform.rotate(
 
 
 GREEN_LITTLE_BEAM_LASER = pygame.transform.scale(
-    pygame.image.load(os.path.join("Assets", "laser", "little_beams_green.png")),
+    pygame.image.load(os.path.join(
+        "Assets", "laser", "little_beams_green.png")),
     (25, 87),
 )
 RED_LITTLE_BEAM_LASER = pygame.transform.scale(
@@ -237,14 +259,16 @@ RED_LITTLE_BEAM_LASER = pygame.transform.scale(
     (25, 87),
 )
 BLUE_LITTLE_BEAM_LASER = pygame.transform.scale(
-    pygame.image.load(os.path.join("Assets", "laser", "little_beams_blue.png")),
+    pygame.image.load(os.path.join(
+        "Assets", "laser", "little_beams_blue.png")),
     (25, 87),
 )
 
 
 BIG_ORB_GREEN = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "laser", "big_orb_green.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "laser", "big_orb_green.png")),
         (68, 128),
     ),
     180,
@@ -266,7 +290,8 @@ BIG_ORB_BLUE = pygame.transform.rotate(
 
 BASIC_LASER_PLAYER = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "laser", "basic_laser_player.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "laser", "basic_laser_player.png")),
         (65, 45),
     ),
     90,
@@ -274,7 +299,8 @@ BASIC_LASER_PLAYER = pygame.transform.rotate(
 
 
 GREEN_SPEAR_LASER = pygame.transform.scale(
-    pygame.image.load(os.path.join("Assets", "laser", "spear_laser_green.png")),
+    pygame.image.load(os.path.join(
+        "Assets", "laser", "spear_laser_green.png")),
     (85, 150),
 )
 RED_SPEAR_LASER = pygame.transform.scale(
@@ -288,7 +314,8 @@ BLUE_SPEAR_LASER = pygame.transform.scale(
 
 BASIC_LASER_PLAYER = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "laser", "basic_laser_player.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "laser", "basic_laser_player.png")),
         (65, 45),
     ),
     90,
@@ -304,14 +331,16 @@ HUGE_RED_LASER = pygame.transform.rotate(
 )
 HUGE_LASER_RED = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "laser", "basic_red_orb.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "laser", "basic_red_orb.png")),
         (275, 125),
     ),
     270,
 )
 HUGE_LASER_BLUE = pygame.transform.rotate(
     pygame.transform.scale(
-        pygame.image.load(os.path.join("Assets", "laser", "basic_blue_orb.png")),
+        pygame.image.load(os.path.join(
+            "Assets", "laser", "basic_blue_orb.png")),
         (275, 125),
     ),
     270,
@@ -356,15 +385,18 @@ ITEM_MULTIPLE_SHOOT = pygame.transform.scale(
     (50, 50),
 )
 ITEM_MULTIPLE_SHOOT_FADE1 = pygame.transform.scale(
-    pygame.image.load(os.path.join("Assets", "items", "multiple_shoot_fade1.png")),
+    pygame.image.load(os.path.join(
+        "Assets", "items", "multiple_shoot_fade1.png")),
     (50, 50),
 )
 ITEM_MULTIPLE_SHOOT_FADE2 = pygame.transform.scale(
-    pygame.image.load(os.path.join("Assets", "items", "multiple_shoot_fade2.png")),
+    pygame.image.load(os.path.join(
+        "Assets", "items", "multiple_shoot_fade2.png")),
     (50, 50),
 )
 ITEM_MULTIPLE_SHOOT_FADE3 = pygame.transform.scale(
-    pygame.image.load(os.path.join("Assets", "items", "multiple_shoot_fade3.png")),
+    pygame.image.load(os.path.join(
+        "Assets", "items", "multiple_shoot_fade3.png")),
     (50, 50),
 )
 
@@ -409,7 +441,8 @@ class Explosion:
             surface.blit(
                 pygame.transform.scale(
                     self.img,
-                    (self.support.get_width() * 0.8, self.support.get_height() * 0.8),
+                    (self.support.get_width() * 0.8,
+                     self.support.get_height() * 0.8),
                 ),
                 (self.x, self.y),
             )
@@ -743,7 +776,7 @@ class Ennemy(Shooter):
 
     def shoot(self):
         "shoot"
-        if random.randrange(1, self.cooldown) == 20:
+        if random.randrange(1, int(self.cooldown)) == 20:
             laser = Laser(
                 self.x + self.width / 2 - self.img_laser.get_width() / 2,
                 self.y + self.height * 0.8,
@@ -856,7 +889,7 @@ class Huge(Ennemy):
 
     def shoot(self):
         "shoot"
-        if random.randrange(1, self.cooldown) == 20:
+        if random.randrange(1, int(self.cooldown)) == 20:
             laser1 = Laser(
                 self.x + self.width / 2 - self.img_laser.get_width(),
                 self.y + self.height * 0.8,

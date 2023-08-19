@@ -25,8 +25,8 @@ MAX_LASER_PLAYER = 8
 VELOCITY_LASER_PLAYER = 9
 LASER_SIZE = LASER_WIDTH, LASER_HEIGHT = 18, 6
 
-CURRENT_LEVEL = 4
-LIFE_LEFT = 20
+CURRENT_LEVEL = 1
+LIFE_LEFT = 3
 MAX_LEVEL = 25
 LIST_LEVEL = flevel.create_list_level(MAX_LEVEL)
 pygame.display.set_caption("Space Invaders")
@@ -39,15 +39,16 @@ SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 45, 78
 
 FONT_MENU_WELCOME = pygame.font.SysFont("comicsans", 120)
 FONT_MENU_START = pygame.font.SysFont("comicsans", 55)
-FONT_HUD = pygame.font.SysFont("comicsans", 55)
+FONT_HUD = pygame.font.SysFont("comicsans", 40)
 
-MAIN_WIN_SIZE = WIDTH, HEIGHT = 1200, 800
+MAIN_WIN_SIZE = WIDTH, HEIGHT = 1400, 800
 MAIN_WIN = pygame.display.set_mode(MAIN_WIN_SIZE)
 
 LIST_DIFFICULTY = ["Easy", "Medium", "Hard"]
 DIFFICULTY_NUMBER = 0
 
-text_menu_welcome = FONT_MENU_WELCOME.render("Space Invaders Retro", 1, LIGHT_GREY)
+text_menu_welcome = FONT_MENU_WELCOME.render(
+    "Space Invaders Retro", 1, LIGHT_GREY)
 text_menu_start_game = FONT_MENU_START.render("Start the game", 1, GREY)
 TEXT_MENU_DIFFICULTY = FONT_MENU_START.render(
     f"Difficulty: {LIST_DIFFICULTY[DIFFICULTY_NUMBER]}", 1, GREY
@@ -115,7 +116,8 @@ class LinkedText:
             new_text = pygame.transform.scale(text, new_size)
             surface.blit(
                 new_text,
-                (self.x - new_text.get_width() / 2, self.y - new_text.get_height() / 2),
+                (self.x - new_text.get_width() / 2,
+                 self.y - new_text.get_height() / 2),
             )
 
             start_pos = (
@@ -127,12 +129,14 @@ class LinkedText:
                 self.y + new_text.get_height() / 2,
             )
             pygame.draw.line(
-                surface, GREY, start_pos, end_pos, width=int(text.get_height() * 0.08)
+                surface, GREY, start_pos, end_pos, width=int(
+                    text.get_height() * 0.08)
             )
 
         else:
             surface.blit(
-                text, (self.x - text.get_width() / 2, self.y - text.get_height() / 2)
+                text, (self.x - text.get_width() / 2,
+                       self.y - text.get_height() / 2)
             )
 
 
@@ -147,7 +151,8 @@ MENU_SELECTED = start_game
 def draw_menu(text_blink, text_scroll, surface):
     "draw the start menu, text_scroll can be up, down or none"
 
-    surface.blit(pygame.transform.scale(IMG_MENU_BACKGROUND, MAIN_WIN_SIZE), (0, 0))
+    surface.blit(pygame.transform.scale(
+        IMG_MENU_BACKGROUND, MAIN_WIN_SIZE), (0, 0))
 
     text_blink = (text_blink + 1) % 100
     if text_blink <= 50:
@@ -192,24 +197,24 @@ def draw_game(player, ennemies, list_item, surface, img_background, i):
     i = draw_background(surface, img_background, i)
 
     # Draw HUD
-    text_hud_life = FONT_HUD.render(f"Life = {LIFE_LEFT}", 1, LIGHT_GREY)
-    text_hud_lvl = FONT_HUD.render(f"Level = {CURRENT_LEVEL}", 1, LIGHT_GREY)
+    text_hud_life = FONT_HUD.render(f"Life = {LIFE_LEFT}", 1, WHITE)
+    text_hud_lvl = FONT_HUD.render(f"Level = {CURRENT_LEVEL}", 1, WHITE)
 
-    surface.blit(text_hud_life, (WIDTH * 0.85, 50))
-    surface.blit(text_hud_lvl, (WIDTH * 0.85, 110))
+    surface.blit(text_hud_life, (WIDTH * 0.98 - text_hud_life.get_width(), 50))
+    surface.blit(text_hud_lvl, (WIDTH * 0.98 - text_hud_lvl.get_width(), 100))
     if player.shield_cooldown_text is not None:
         text_hud_shield = FONT_HUD.render(
-            f"Shield : {player.shield_cooldown_text // 1000}s", 1, LIGHT_GREY
+            f"Shield : {player.shield_cooldown_text // 1000}s", 1, WHITE
         )
-        surface.blit(text_hud_shield, (WIDTH * 0.75, 400))
+        surface.blit(text_hud_shield, (WIDTH * 0.98 - text_hud_shield.get_width(), 200))
 
     if player.multiple_shoot_cooldown_text is not None:
         text_hud_multiple_shoot = FONT_HUD.render(
             f"Super Shoot : {player.multiple_shoot_cooldown_text // 1000}s",
             1,
-            LIGHT_GREY,
+            WHITE,
         )
-        surface.blit(text_hud_multiple_shoot, (WIDTH * 0.70, 550))
+        surface.blit(text_hud_multiple_shoot, (WIDTH * 0.98 - text_hud_multiple_shoot.get_width(), 250))
 
     for ennemy in ennemies:
         ennemy.draw(MAIN_WIN)
@@ -230,10 +235,19 @@ def draw_game(player, ennemies, list_item, surface, img_background, i):
 
 def draw_lose(surface, text_blink):
     "Draw the losing screen"
-    surface.blit(pygame.transform.scale(IMG_GAME_BACKGROUND, MAIN_WIN_SIZE), (0, 0))
+    surface.blit(pygame.transform.scale(
+        IMG_GAME_BACKGROUND, MAIN_WIN_SIZE), (0, 0))
 
-    text_lose = FONT_MENU_WELCOME.render("U LOST", 1, LIGHT_GREY)
+    text_lose = FONT_MENU_WELCOME.render("YOU LOST", 1, LIGHT_GREY)
     text_press = FONT_MENU_WELCOME.render("Press Enter", 1, LIGHT_GREY)
+
+    surface.blit(
+        text_lose,
+        (
+            WIDTH / 2 - text_lose.get_width() / 2,
+            HEIGHT / 3 - text_lose.get_height() / 2,
+        ),
+    )
 
     text_blink = (text_blink + 1) % 100
     if text_blink <= 50:
@@ -241,19 +255,11 @@ def draw_lose(surface, text_blink):
             text_press,
             (
                 WIDTH / 2 - text_press.get_width() / 2,
-                HEIGHT / 2
+                HEIGHT / 3
                 - text_press.get_height() / 2
                 + 1.35 * text_lose.get_height(),
             ),
         )
-
-    surface.blit(
-        text_lose,
-        (
-            WIDTH / 2 - text_lose.get_width() / 2,
-            HEIGHT / 2 - text_lose.get_height() / 2,
-        ),
-    )
     pygame.display.update()
     return text_blink
 
@@ -265,35 +271,41 @@ def wave_ennemies(nb_level):
     random.shuffle(list_ennemies)
     ennemies = []
     number = len(list_ennemies)
-    abscisse = random.randrange(WIDTH * 0.1, WIDTH * 0.3)  # trouver moyen de fix ça
+    # trouver moyen de fix ça
+    abscisse = random.randrange(int(WIDTH * 0.1), int(WIDTH * 0.3))
     ordonnee = -50
     ennemies_on_line = 0
     for i in range(number):
         if WIDTH - abscisse < 100 or ennemies_on_line > 7 + math.floor(nb_level * 1.5):
             ennemies_on_line = 0
-            abscisse = random.randrange(WIDTH * 0.05, WIDTH * 0.15)
+            abscisse = random.randrange(int(WIDTH * 0.05), int(WIDTH * 0.15))
             ordonnee -= random.randrange(30, 80)
         ord_rel = random.randrange(0, 40)
         current = list_ennemies[i]
         if current == "little":
             ennemy = fclass.Little_Ennemy(
-                abscisse, ordonnee + ord_rel, random.choice(["red", "blue", "green"])
+                abscisse, ordonnee +
+                ord_rel, random.choice(["red", "blue", "green"])
             )
         elif current == "lit_med":
             ennemy = fclass.Lit_Med(
-                abscisse, ordonnee + ord_rel, random.choice(["red", "blue", "green"])
+                abscisse, ordonnee +
+                ord_rel, random.choice(["red", "blue", "green"])
             )
         elif current == "medium":
             ennemy = fclass.Medium(
-                abscisse, ordonnee + ord_rel, random.choice(["red", "blue", "green"])
+                abscisse, ordonnee +
+                ord_rel, random.choice(["red", "blue", "green"])
             )
         elif current == "big":
             ennemy = fclass.Big(
-                abscisse, ordonnee + ord_rel, random.choice(["red", "blue", "green"])
+                abscisse, ordonnee +
+                ord_rel, random.choice(["red", "blue", "green"])
             )
         elif current == "huge":
             ennemy = fclass.Huge(
-                abscisse, ordonnee + ord_rel, random.choice(["red", "blue", "green"])
+                abscisse, ordonnee +
+                ord_rel, random.choice(["red", "blue", "green"])
             )
         ennemies.append(ennemy)
         ennemies_on_line += 1
@@ -328,7 +340,8 @@ def move_ennemies(player, ennemies):
             explosion2 = fclass.Explosion(ennemy.x, ennemy.y, ennemy)
             fclass.LIST_EXPLOSION.append(explosion2)
             ennemies.remove(ennemy)
-        elif not ennemy.not_off_screen(HEIGHT):  # todo enlever ces doubles negations
+        # todo enlever ces doubles negations
+        elif not ennemy.not_off_screen(HEIGHT):
             ennemies.remove(ennemy)
             global LIFE_LEFT
             LIFE_LEFT -= 1
@@ -345,8 +358,8 @@ def spawn_item(level):
     nb_item_max = random.randrange((level // 5) + 1, 2 * (level // 5) + 6)
 
     for _ in range(nb_item_max):
-        x = random.randrange(WIDTH * 0.1, WIDTH * 0.9)
-        y = random.randrange(HEIGHT * 0.2, HEIGHT * 0.9)
+        x = random.randrange(int(WIDTH * 0.1), int(WIDTH * 0.9))
+        y = random.randrange(int(HEIGHT * 0.2), int(HEIGHT * 0.9))
         item = random.choice(list_item_possible)(x, y)
         list_item_spawned.append(item)
     return list_item_spawned
@@ -421,7 +434,8 @@ def init_game_stage(level, old_background):
 def draw_inter_stage(level, surface):
     "Draw the transition between two stages"
     surface.fill((0, 0, 0))
-    text_inter_stage = FONT_HUD.render(f"Stage {level // 5 + 1}", 1, LIGHT_GREY)
+    text_inter_stage = FONT_HUD.render(
+        f"Stage {level // 5 + 1}", 1, LIGHT_GREY)
 
     surface.blit(
         text_inter_stage,
@@ -464,7 +478,8 @@ def main():
             if init_menu_needed:
                 init_menu_needed = False
                 pygame.mixer.music.load(
-                    os.path.join("Assets", "sound_effects", "music", "Menu_Screen.ogg")
+                    os.path.join("Assets", "sound_effects",
+                                 "music", "Menu_Screen.ogg")
                 )
                 pygame.mixer.music.play(-1)
             for event in pygame.event.get():
@@ -506,7 +521,8 @@ def main():
                         run_game = True
                         init_menu_needed = True
 
-            text_blink, text_scroll = draw_menu(text_blink, text_scroll, MAIN_WIN)
+            text_blink, text_scroll = draw_menu(
+                text_blink, text_scroll, MAIN_WIN)
 
         while run_game:
             clock.tick(FPS)
@@ -572,7 +588,8 @@ def main():
             if player.lifebar <= 0:
                 player.lifebar = player.maxlife
                 LIFE_LEFT -= 1
-            i = draw_game(player, ennemies, list_item, MAIN_WIN, img_background, i)
+            i = draw_game(player, ennemies, list_item,
+                          MAIN_WIN, img_background, i)
             if LIFE_LEFT <= 0:
                 CURRENT_LEVEL = 1
                 LIFE_LEFT = 3
@@ -590,7 +607,8 @@ def main():
             if init_menu_needed:
                 pygame.mixer.music.unload()
                 pygame.mixer.music.load(
-                    os.path.join("Assets", "sound_effects", "music", "defeat.ogg")
+                    os.path.join("Assets", "sound_effects",
+                                 "music", "defeat.ogg")
                 )
                 pygame.mixer.music.play(-1)
                 init_menu_needed = False
