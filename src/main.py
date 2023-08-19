@@ -1,4 +1,5 @@
-# pylint: disable=no-member
+#!/usr/bin/env python3
+
 """
 Space invaders
 """
