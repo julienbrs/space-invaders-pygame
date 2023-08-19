@@ -105,7 +105,7 @@ Simply run the game and use arrow keys to move left or right. Use the space bar 
 
 Bourseau Julien - _1st year student at Ensimag, 2021/2022_ - julien.bourseau@gmail.com
 
-Project Link: [https://github.com/julienbrs/space_invaders](https://github.com/julienbrs/space_invaders)
+Project Link: [https://github.com/julienbrs/space-invaders-pygame](https://github.com/julienbrs/space-invaders-pygame)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
