@@ -5,12 +5,18 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/julienbrs/space_invaders">
-    <img src="Assets/Space_Invaders_Logo.png" alt="Logo" width="128" height="55">
+  <a href="https://github.com/julienbrs/space-invaders-pygame">
+    <img src="Assets/spaceship_red.png" alt="Logo" width="83" height="69">
   </a>
 
   </p>
 </div>
+
+<strong>Old project done in 2022</strong>
+
+By being my very first project Python interface using Pygame, this implementation is not clean at all, most of the code is in the main.py file, very few classes are used and the code is not modular.
+
+See a more recent implementation of the game in JS [here](https://github.com/julienbrs/Mail-invaders)
 
 <!-- TABLE OF CONTENTS -->
 
@@ -36,13 +42,18 @@
 
 ## About The Project
 
-[![forthebadge made-with-python](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
+[![Python Badge](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)](https://www.python.org/)
+[![Pygame Badge](https://img.shields.io/badge/pygame-%236772E7?style=for-the-badge&logo=pygame&logoColor=white)](https://www.pygame.org/)
 
-Approximation of the value of pi by the Monte Carlo method. The graphical display is done with the `draw.py` script while the approximation of the value can be done independently with `approximation.py`. Developed in python
+<!-- <p align="center">
+  <img src="Assets/space.png" alt="Game Screenshot"/>
+</p> -->
+
+A retro arcade classic, Space Invaders challenges players to fend off waves of incoming alien invaders, aiming to prevent them from reaching the bottom of the screen. This version of Space Invaders is made with Python and Pygame.
 
 <br />
 <p align="center">
-  <img src="ressources/show_result.gif" alt="Product Name Screen Shot"/>
+  <img src="Assets/screenshot_space_invaders.png" alt="Product Name Screen Shot" width="66%">
 </p>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -64,40 +75,27 @@ To get a local copy up and running follow these simple example steps.
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/julienbrs/space_invaders.git
+   git clone https://github.com/julienbrs/space-invaders-pygame.git
    ```
 2. Rights to execute
    ```sh
-   chmod +x draw.py
-   chmod +x approximate_pi.py
+   chmod +x src/main.py
    ```
-3. Then run the program, see more info about parameters in the [Usage](#usage) section
+3. Then run the program
    ```sh
-   ./draw.py 600 5000 5
+   ./src/main.py
    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage
 
-By running `approximate.pi` directly, you need to put the number of points as a parameter. The result will be displayed in the terminal.
+Simply run the game and use arrow keys to move left or right. Use the space bar to shoot lasers at incoming alien invaders. Defend your base, collect bonus and try to achieve the highest score!
 
-```sh
-./approximate_pi.py 5000
-```
+<p align="center">
+  <img src="Assets/screenshot_ingame_invaders.png" alt="Gameplay" width="66%">
+</p>
 
-![screenshot approximation.py result](ressources/approx_cmd.png)
-
-By running `draw.py`, you need to put:
-
-- the size of output image result
-- the number of points
-- the number of digits after the decimal point
-- optional parameter: `false` to disable cleaning of the last result
-
-```sh
-./draw.py 600 5000 5
-```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
